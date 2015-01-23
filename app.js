@@ -5,12 +5,18 @@
 
 var express = require('express'),
   routes = require('./routes'),
-  api = require('./routes/api'),
-  http = require('http'),
-  path = require('path'),
-  mongoose = require('mongoose'),
+  logger = require('morgan'),
+  cookieParser = require('cookie-parser'),
+  bodyParser = require('body-parser'),
+  methodOverride = require('method-override'),
+  session = require('express-session'),
   passport = require('passport'),
-  LocalStrategy = require('passport-local').Strategy;
+  jade = require('jade'),
+  mongoose = require('mongoose'),
+  LocalStrategy = require('passport-local'),
+  TwitterStrategy = require('passport-twitter'),
+  GoogleStrategy = require('passport-google'),
+  FacebookStrategy = require('passport-facebook');
 
 var app = module.exports = express();
 
@@ -20,49 +26,59 @@ var app = module.exports = express();
 
 // all environments
 app.set('port', process.env.PORT || 3000);
+
+app.use(logger('combined'));
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(session({secret: 'supernova', saveUninitialized: true, resave: true}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Session-persisted message middleware
+app.use(function(req, res, next){
+  var err = req.session.error,
+      msg = req.session.notice,
+      success = req.session.success;
+
+  delete req.session.error;
+  delete req.session.success;
+  delete req.session.notice;
+
+  if (err) res.locals.error = err;
+  if (msg) res.locals.notice = msg;
+  if (success) res.locals.success = success;
+
+  next();
+});
+
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
-//app.engine('html', require('ejs').renderFile);
-//app.set('view engine', 'html');
 
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(app.router);
+//passport config
+var Account = require('./model/account');
+passport.use(new LocalStrategy(Account.authenticate()));
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
 
-// development only
-if (app.get('env') === 'development') {
-   app.use(express.errorHandler());
-};
+// mongoose
+mongoose.connect('mongodb://localhost/passport_local_mongoose');
 
-// production only
-if (app.get('env') === 'production') {
-  // TODO
-}; 
-
-
-mongoose.connect('mongodb://localhost:27017/angtest3');
-
-
-// Routes
-app.get('/', routes.index);
-app.get('/partial/:name', routes.partial);
-
-// JSON API
-app.get('/api/name', api.name);
-
-// redirect all others to the index (HTML5 history)
-app.get('*', routes.index);
-
-app.post('/login', passport.authenticate('local', { successRedirect: '/',
-    failureRedirect: '/login' }));
-
-/**
-* Start Server
-*/
-
-http.createServer(app).listen(app.get('port'), function () {
-  console.log('Express server listening on port ' + app.get('port'));
+// logs user out of site, deleting them from the session, and returns to
+// homepage
+app.get('/logout', function(req, res) {
+	var name = req.user.username;
+	console.log("LOGGIN OUT " + req.user.username)
+	req.logout();
+	res.redirect('/');
+	req.session.notice = "You have successfully been logged out " + name + "!";
 });
+
+
+require('./routes/routes')(app);
+//===============PORT=================
+app.listen(app.get('port'));
+console.log("listening on " + app.get('port') + "!");
+

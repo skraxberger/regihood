@@ -1,13 +1,13 @@
 /**
  * New node file
  */
-var AccountSchema = new Schema({
-  username: String,
-  type: Number,
-  admin: Number,
-  facebook_id: String,
-  email: String,
-  date: Date
+var mongoose = require('mongoose'), Schema = mongoose.Schema, passportLocalMongoose = require('passport-local-mongoose');
+
+var Account = new Schema({
+	username : String,
+	password : String
 });
 
-mongoose.model('Account', AccountSchema);
+Account.plugin(passportLocalMongoose);
+
+module.exports = mongoose.model('Account', Account);
