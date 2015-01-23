@@ -1,0 +1,13 @@
+#page-outer
+  .AppContent.wrapper-front(id="page-container")        
+    .front-container.front-container-full-signup(id="front-container")
+      .front-card
+        include front_welcome.jade
+        include signin-form.jade
+        include signup-form.jade
+      noscript
+        include no_script_warning.jade
+      .front-warning(id="front-no-cookies-warn")
+        include front_warning.jade
+      .footer.inline-list
+        include footer.jade

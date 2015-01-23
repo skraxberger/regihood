@@ -1,0 +1,14 @@
+.row
+	.col-lg-12
+		div
+			br(style='clear: both')
+			.form-group.col-md-4
+				label#messageLabel(for='message') Message 
+				textarea#message.form-control.input-sm(type='textarea', placeholder='Message', maxlength='240', rows='7')
+				span.help-block
+					p#characterLeft.help-block You have reached the limit
+				br(style='clear: both')
+				.form-group.col-md-2
+				button#btnSubmit.form-control.input-sm.btn.btn-success.disabled(name='btnSubmit', type='button', style='height: 35px') Send
+		block extraJS
+			script(src="js/test.js")

@@ -8,7 +8,9 @@ var express = require('express'),
   api = require('./routes/api'),
   http = require('http'),
   path = require('path'),
-  mongoose = require('mongoose');
+  mongoose = require('mongoose'),
+  passport = require('passport'),
+  LocalStrategy = require('passport-local').Strategy;
 
 var app = module.exports = express();
 
@@ -20,6 +22,10 @@ var app = module.exports = express();
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
+
+//app.engine('html', require('ejs').renderFile);
+//app.set('view engine', 'html');
+
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
@@ -49,6 +55,9 @@ app.get('/api/name', api.name);
 
 // redirect all others to the index (HTML5 history)
 app.get('*', routes.index);
+
+app.post('/login', passport.authenticate('local', { successRedirect: '/',
+    failureRedirect: '/login' }));
 
 /**
 * Start Server
