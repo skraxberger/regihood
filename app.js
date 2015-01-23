@@ -6,6 +6,7 @@
 var express = require('express'),
   routes = require('./routes'),
   logger = require('morgan'),
+  path = require('path'),
   cookieParser = require('cookie-parser'),
   bodyParser = require('body-parser'),
   methodOverride = require('method-override'),
@@ -35,6 +36,7 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(session({secret: 'supernova', saveUninitialized: true, resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Session-persisted message middleware
 app.use(function(req, res, next){
