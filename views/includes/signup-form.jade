@@ -2,12 +2,12 @@
   h2
     | <strong>Neu bei Kauf Natur?</strong> Registrieren
   
-  form.t1-form-signup(action="https://twitter.com/signup", id="frontpage-signup-form", method="post")
+  form.t1-form-signup(action="/register", id="frontpage-signup-form", method="post")
     .field
-      input.text-input(type="text", autocomplete="off", name="user[name]", maxlength="20", placeholder="Ganzer Name")
+      input.text-input(type="text", autocomplete="off", name="username", maxlength="20", placeholder="Ganzer Name")
     .field
-      input.text-input.email-input(type="text", autocomplete="off", name="user[email]", placeholder="Email")
+      input.text-input.email-input(type="text", autocomplete="off", name="email", placeholder="Email")
     .field
-      input.text-input(type="password", name="user[user_password]", placeholder="Passwort")
+      input.text-input(type="password", name="password", placeholder="Passwort")
     input(type="hidden", value="", name="context")
     button.btn.signup-btn.u-floatRight(type="submit") Registrieren

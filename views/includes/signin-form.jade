@@ -1,10 +1,10 @@
 .front-signin.js-front-signin
-  form.t1-form.signin(action="https://twitter.com/sessions", method="post")
+  form.t1-form.signin(role='form', action="/login", method="post")
     .username.field
       input.text-input.email-input(
         type="text"
         id="signin-email"
-        name="session[username_or_email]"
+        name="username"
         autocomplete="on"
         placeholder="Email oder Benutzername"
       )
