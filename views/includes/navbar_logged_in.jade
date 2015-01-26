@@ -1,0 +1,24 @@
+.topbar.js-topbar
+  .ProfilePage-editingOverlay
+  .global-nav(data-section-term="top_nav")
+    .global-nav-inner
+      .container
+        ul.nav.js-global-actions
+          li.home(data-global-action="t1home")
+              a.nav-logo-link(href="/", data-nav="front")
+                img(id='logoImage', src='img/logo.png')
+        .pull-right(style="display: inline-block;")
+          div(role="search")
+            form.t1-form.form-search.js-search-form(action="/search", id="global-nav-search")
+              label.visuallyhidden(for="search-query") Suchen
+              input.search-input(type="text", id="search-query", placeholder="Suchen", name="q", autocomplete="off", spellcheck="false")
+          ul.nav.right-actions
+            li
+              a(href="profile")
+                img(id='profile', src='img/globe-32.png')
+            li
+              a(href="search")
+                img(id='searchImg', src='img/search-32.png')
+            li
+              a(href="/logout")
+                img(id='logout', src='img/view-32.png')

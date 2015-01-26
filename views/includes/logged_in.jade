@@ -1,30 +1,4 @@
-//
-   Created by skraxberger on 23.01.2015.
-.container
-    .navbar-header
-        button.navbar-toggle(type="button", data-toggle="collapse", data-target="#navbar-ex1-collapse")
-            span.sr-only Toggle navigation
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-        a.navbar-brand(href="/")
-            img(id='logoImage', src='img/logo.png')
-    .collapse.navbar-collapse(id="navbar-ex1-collapse")
-        ul.nav.navbar-nav
-            li
-                a(href="messages")
-                    img(id='logoImage', src='img/message-32.png')
-        ul.nav.navbar-nav.navbar-right
-            li
-                a(href="profile")
-                    img(id='logoImage', src='img/globe-32.png')
-            li
-                a(href="search")
-                    img(id='logoImage', src='img/search-32.png')
-.container
-    div(ng-controller='AppController')
-        div(ng-view)
-hr
-div
-    | Gscheit Kaufen Freundeskreis: v
-    span(app-version)
+#page-outer
+    .AppContent.wrapper.wrapper-home(id="page-container")
+        div(ng-controller='AppController')
+            div(ng-view)

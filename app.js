@@ -4,7 +4,6 @@
  */
 
 var express = require('express'),
-  routes = require('./routes'),
   logger = require('morgan'),
   path = require('path'),
   cookieParser = require('cookie-parser'),
@@ -67,17 +66,6 @@ passport.deserializeUser(Account.deserializeUser());
 
 // mongoose
 mongoose.connect('mongodb://localhost:27017/passport_local_mongoose');
-
-// logs user out of site, deleting them from the session, and returns to
-// homepage
-app.get('/logout', function(req, res) {
-	var name = req.user.username;
-	console.log("LOGGIN OUT " + req.user.username)
-	req.logout();
-	res.redirect('/');
-	req.session.notice = "You have successfully been logged out " + name + "!";
-});
-
 
 require('./routes/routes')(app);
 //===============PORT=================
