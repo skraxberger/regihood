@@ -2,3 +2,115 @@
 body {
 	padding-top: 70px;
 }
+
+/**********************************
+
+Name: cmxform Styles
+
+***********************************/
+form.cmxform {
+    width: 370px;
+    font-size: 1.0em;
+    color: #333;
+}
+
+form.cmxform legend {
+    padding-left: 0;
+}
+
+form.cmxform legend, form.cmxform label {
+    color: #333;
+}
+
+form.cmxform fieldset {
+    border: none;
+    border-top: 1px solid #C9DCA6;
+    background: url(../images/cmxform-fieldset.gif) left bottom repeat-x;
+    background-color: #F8FDEF;
+}
+
+form.cmxform fieldset fieldset {
+    background: none;
+}
+
+form.cmxform fieldset p, form.cmxform fieldset fieldset {
+    padding: 5px 10px 7px;
+    background: url(../images/cmxform-divider.gif) left bottom repeat-x;
+}
+
+form.cmxform label.error, label.error {
+    /* remove the next line when you have trouble in IE6 with labels in list */
+    color: red;
+    font-style: italic
+}
+div.error { display: none; }
+input { border: 1px solid black; }
+input:focus { border: 1px dotted black; }
+input.error { border: 1px dotted red; }
+form.cmxform .gray * { color: gray; }
+
+label.valid {
+    width: 24px;
+    height: 24px;
+    background: url(../img/valid.png) center center no-repeat;
+    display: inline-block;
+    text-indent: -9999px;
+}
+label.error {
+    font-weight: bold;
+    color: red;
+    padding: 2px 8px;
+    margin-top: 2px;
+}
+
+.spaceLeft{
+    margin-left:10px;
+}
+
+.inline-list {
+    margin-left: 0
+}
+
+.inline-list li {
+    display: inline
+}
+
+
+.footer {
+    bottom: 30px;
+    color: #000;
+    font-size: 11px;
+    position: absolute;
+    text-align: center;
+    width: 100%
+}
+
+.footer {
+    color: rgba(1, 1, 1, 0.75)
+}
+
+.footer a {
+    color: #000
+}
+
+.footer a {
+    color: rgba(1, 1, 1, 0.75)
+}
+
+.footer ul {
+    display: inline-block
+}
+
+.footer a:hover {
+    color: #000;
+    text-decoration: none
+}
+
+.footer li {
+    display: inline;
+    margin: 0 3px
+}
+
+.footer .divider {
+    display: none
+}

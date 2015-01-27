@@ -7,11 +7,7 @@ var Account = require('../model/account');
 module.exports = function (app) {
 
     app.get('/', function (req, res) {
-            var bodyClasses = ["three-col", "logged-out", "ms-windows", "front-page-photo-set", "front-page"];
-            if (req.user)
-                bodyClasses = ["three-col", "logged-in", "ms-windows", "enhanced-mini-profile", "supports-drag-and-drop"];
-
-            res.render('index', {user: req.user, bodyClassVariables: bodyClasses});
+            res.render('index', {user: req.user});
         }
     )
     ;
@@ -24,11 +20,7 @@ module.exports = function (app) {
     app.post('/register', function (req, res) {
         Account.register(new Account({username: req.body.username}), req.body.password, function (err, account) {
             if (err) {
-                var bodyClasses = ["three-col", "logged-out", "ms-windows", "front-page-photo-set", "front-page"];
-                if (req.user)
-                    bodyClasses = ["three-col", "logged-in", "ms-windows", "enhanced-mini-profile", "supports-drag-and-drop"];
-
-                res.render('index', {account: account, bodyClassVariables: bodyClasses});
+                res.render('index', {account: account});
             }
 
             passport.authenticate('local', {
@@ -53,12 +45,13 @@ module.exports = function (app) {
         res.redirect('/');
     });
 
-    app.get('*', function (req, res) {
-        var bodyClasses = ["three-col", "logged-out", "ms-windows", "front-page-photo-set", "front-page"];
-        if (req.user)
-            bodyClasses = ["three-col", "logged-in", "ms-windows", "enhanced-mini-profile", "supports-drag-and-drop"];
+    app.get('/test', function (req, res) {
+        res.render('test');
+    });
 
-        res.render('index', {user: req.user, bodyClassVariables: bodyClasses});
+
+    app.get('*', function (req, res) {
+        res.render('index', {user: req.user});
     });
 
 }

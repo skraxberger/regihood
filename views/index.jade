@@ -2,16 +2,11 @@ extends layout
 
 block body
   if (!user)
-    #doc
-       include ./includes/navbar_logged_out.jade
-       include ./includes/logged_out.jade
+    include ./includes/navbar_logged_out.jade
+    include ./includes/logged_out.jade
+block extraJS
+    script(src="js/validate.js")
   else
-    #doc
-      include ./includes/navbar_logged_in.jade
-      include ./includes/logged_in.jade
+    include ./includes/navbar_logged_in.jade
+    include ./includes/logged_in.jade
 
-  script(src='js/lib/angular/angular.js')
-  script(src='js/lib/angular/angular-route.js')
-  script(src='js/app.js')
-  script(src='js/controllers.js')
-  block extraJS

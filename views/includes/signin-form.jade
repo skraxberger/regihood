@@ -1,25 +1,83 @@
-.front-signin.js-front-signin
-  form.t1-form.signin(role='form', action="/login", method="post")
-    .username.field
-      input.text-input.email-input(
-        type="text"
-        id="username"
-        name="username"
-        autocomplete="on"
-        placeholder="Email oder Benutzername"
-      )
-    table.flex-table.password-signin
-      tbody
-        tr
-          td.flex-table-primary
-            .password.flex-table-form
-              input.text-input.flex-table-input(type="password", id="password", name="password", placeholder="Passwort")
-          td.flex-table-secondary
-            button.submit.btn.primary-btn.flex-table-btn.js-submit(type="Absenden") Anmelden
+.mainbox(id="loginbox", style="margin-top:20px;")
+    .panel.panel-info
+        .panel-heading
+            .panel-title Sign In
+            div(style="float:right; font-size: 80%; position: relative; top:-10px")
+                a(href="#") Forgot password?
+        .panel-body(style="padding-top:30px")
+            .alert.alert-danger.col-sm-12(style="display:none", id="login-alert")
+            form.form-horizontal(action="/login", role="form", method="post")
+                .input-group(style="margin-bottom: 25px")
+                    span.input-group-addon
+                        i.glyphicon.glyphicon-user
+                    input.form-control(id="login-username", type="text", name="username", value="", placeholder="username or email")
+                .input-group(style="margin-bottom: 25px")
+                    span.input-group-addon
+                        i.glyphicon.glyphicon-lock
+                    input.form-control(id="login-password", type="password", name="password", placeholder="password")
+                .input-group
+                    .checkbox
+                        label
+                            input(id="login-remember", type="checkbox", name="remember", value="1")
+                            | Remember me
+                .form-group(style="margin-top:10px")
+                    .col-sm-12.controls
+                        button.btn.btn-success(id="btn-login", type="submit", value="submit") Login
+                .form-group(style="margin-top:10px")
+                    .col-sm-12.controls
+                        div(style="border-top: 1px solid#888; padding-top:15px; font-size:85%")
+                            button.btn.btn-sm.btn-social.btn-facebook(id="btn-fblogin", type="button")
+                                i.fa.fa-facebook
+                                | Login with Facebook
+                            span.spaceLeft
+                            button.btn.btn-sm.btn-social.btn-google-plus(id="btn-googlelogin", type="button")
+                                i.fa.fa-google
+                                | Login with Google
+                            span.spaceLeft
+                            button.btn.btn-sm.btn-social.btn-twitter(id="btn-twitterlogin", type="button")
+                                i.fa.fa-twitter
+                                | Login with Twitter
+                .form-group
+                    .col-md-12.controls
+                        div(style="border-top: 1px solid#888; padding-top:15px; font-size:85%") Don't have an account!
+                            | <a href="#" onClick="$('#loginbox').hide(); $('#signupbox').show()">Sign Up Here</a>
 
-    .remember-forgot
-      label.t1-label.remember
-        input(type="checkbox", value="1", name="remember_me")
-        span Vergiss mich nicht
-      span.separator &middot;
-      a.forgot(href="/account/begin_password_reset") Passwort vergessen?
+.mainbox(id="signupbox", style="display:none; margin-top:20px")
+    .panel.panel-info
+        .panel-heading
+            .panel-title Sign Up
+            div(style="float:right; font-size: 85%; position: relative; top:-10px")
+                | <a id="signinlink" href="#" onClick="$('#signupbox').hide(); $('#loginbox').show()">Sign In</a>
+        .panel-body
+            form.form-horizontal(id="registration-form", role="form")
+                .alert.alert-danger(id="signupalert", style="display:none")
+                    p Error:
+                    span
+                .form-group
+                    label.col-md-3.control-label(for="email") Email
+                    .col-md-9
+                        input.form-control(type="text", name="email", placeholder="Email Adresse")
+                .form-group
+                    label.col-md-3.control-label(for="email") Vorname
+                    .col-md-9
+                        input.form-control(type="text", name="firstname", placeholder="Vorname")
+                .form-group
+                    label.col-md-3.control-label(for="email") Nachname
+                    .col-md-9
+                        input.form-control(type="text", name="lastname", placeholder="Nachname")
+                .form-group
+                    label.col-md-3.control-label(for="email") Passwort
+                    .col-md-9
+                        input.form-control(type="text", name="password", placeholder="Passwort")
+                .form-group
+                    <!-- Button -->
+                    .col-md-offset-3.col-md-9
+                        button.btn.btn-info(id="btn-signup", type="button")
+                            i.icon-hand-right
+                                | &nbsp Sign Up
+                        span(style="margin-left:8px;") or
+                .form-group(style="border-top: 1px solid #999; padding-top:20px")
+                    .col-md-offset-3.col-md-9
+                        button.btn.btn-primary(id="btn-fbsignup", type="button")
+                            i.icon-facebook
+                            | Sign Up with Facebook
