@@ -4,9 +4,12 @@ block body
   if (!user)
     include ./includes/navbar_logged_out.jade
     include ./includes/logged_out.jade
-block extraJS
-    script(src="js/validate.js")
+
+
   else
     include ./includes/navbar_logged_in.jade
     include ./includes/logged_in.jade
 
+block extraJS
+  if(!user)
+    script(src="js/validate.js")
