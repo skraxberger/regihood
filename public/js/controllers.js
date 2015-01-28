@@ -12,12 +12,18 @@ function AppController($scope, $http) {
   });
 }
 
-function MyCtrl1() {
-	
+function ProfileController() {
+    $scope.messages = [];
 }
-MyCtrl1.$inject = [];
 
 
-function MyCtrl2() {
+
+function SearchController() {
+
 }
-MyCtrl2.$inject = [];
+
+
+// Voting / viewing poll results
+function MessageItemController($scope, $routeParams) {
+    $scope.message = {};
+}

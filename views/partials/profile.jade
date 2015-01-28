@@ -1,4 +1,14 @@
 .row
-    .col-lg-12
-        p This is the partial for view 2.
-        p For user {{user}}
+    .col-xs-6.col-sm-4
+    .col-xs-6.col-sm-4
+        textarea.form-control(placeholder="Nachricht", ng-model="message-new", name="messagebox", id="messagebox")
+    .col-xs-6.col-sm-4
+.row(ng-switch on="messages.length")
+    .col-xs-12.col-sm-6.col-md-8
+        ul(ng-switch-when="0")
+            li
+                | <em>No polls in database. Would you like to <a href="#/new">create one</a>?</li>
+        ul(ng-switch-default)
+            li(ng-repeat="message in messages")
+                a(href="#/messages/{{message.id}}")
+                    | {{message.message}}
