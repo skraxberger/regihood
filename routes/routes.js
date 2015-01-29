@@ -3,6 +3,8 @@
  */
 var passport = require('passport');
 var Account = require('../model/account');
+var Message = require('../model/message');
+var NewsItem = require('../model/newsitem');
 
 module.exports = function (app) {
 
@@ -43,6 +45,70 @@ module.exports = function (app) {
     app.post('/logout', function (req, res) {
         req.logout();
         res.redirect('/');
+    });
+
+    app.get('/api/messages', function(req, res) {
+
+        // use mongoose to get all todos in the database
+        Message.find(function(err, messages) {
+
+            // if there is an error retrieving, send the error. nothing after res.send(err) will execute
+            if (err)
+                res.send(err)
+
+            res.json(messages); // return all messages in JSON format
+        });
+    });
+
+    app.get('/api/news', function(req, res) {
+
+        // use mongoose to get all todos in the database
+        NewsItem.find(function(err, news) {
+
+            // if there is an error retrieving, send the error. nothing after res.send(err) will execute
+            if (err)
+                res.send(err)
+
+            res.json(news); // return all messages in JSON format
+        });
+    });
+
+    // create message and send back all messages after creation
+    app.post('/api/messages', function(req, res) {
+
+        // create a message information comes from AJAX request from Angular
+        Message.create({
+            text : req.body.text,
+            done : false
+        }, function(err, message) {
+            if (err)
+                res.send(err);
+
+            // get and return all the messages after you create another
+            Message.find(function(err, messages) {
+                if (err)
+                    res.send(err)
+                res.json(messages);
+            });
+        });
+
+    });
+
+    // delete a todo
+    app.delete('/api/messages/:message_id', function(req, res) {
+        Message.remove({
+            _id : req.params.message_id
+        }, function(err, message) {
+            if (err)
+                res.send(err);
+
+            // get and return all the messages after you create another
+            Message.find(function(err, messages) {
+                if (err)
+                    res.send(err)
+                res.json(messages);
+            });
+        });
     });
 
     app.get('/test', function (req, res) {

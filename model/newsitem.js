@@ -5,10 +5,10 @@ var mongoose = require('mongoose');
 
 var Schema = mongoose.Schema;
 
-var Message = new Schema({
-    user : String,
+var NewsItem = new Schema({
     text : String,
+    user : String,
     date : { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Message', Message);
+module.exports = mongoose.model('NewsItem', NewsItem);

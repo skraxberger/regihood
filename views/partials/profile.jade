@@ -1,14 +1,42 @@
-.row
-    .col-xs-6.col-sm-4
-    .col-xs-6.col-sm-4
-        textarea.form-control(placeholder="Nachricht", ng-model="message-new", name="messagebox", id="messagebox")
-    .col-xs-6.col-sm-4
-.row(ng-switch on="messages.length")
-    .col-xs-12.col-sm-6.col-md-8
-        ul(ng-switch-when="0")
-            li
-                | <em>No polls in database. Would you like to <a href="#/new">create one</a>?</li>
-        ul(ng-switch-default)
-            li(ng-repeat="message in messages")
-                a(href="#/messages/{{message.id}}")
-                    | {{message.message}}
+#wrap(ng-controller="MessageController as msgCtrl")
+    .row
+        .col-xs-6.col-sm-2
+            .card.special
+                .card-heading
+                    .card-heading-header
+                        h6 Aktuelles
+        .col-xs-6.col-sm-7
+            .card.special
+                .card-heading
+                    .card-heading-header
+                        h6 Mein Blabla
+                .card-body
+                    textarea.form-control.simplebox(placeholder="Nachricht", ng-model="post.text", name="messagebox", id="messagebox", style="background-color: #E5E5E5;;")
+                .card-actions
+                    .clearfix
+                        button.btn.btn-primary.pull-right(type="submit", ng-click="createMessage()") Teilen
+        .col-xs-6.col-sm-3
+            .card.special
+                .card-heading
+                    h6 Neuigkeiten
+                .card-body(ng-repeat="item in news")
+                    p {{item.text}}
+    .row
+        .col-xs-6.col-sm-2
+        .col-xs-6.col-sm-7
+            .card(ng-repeat="message in messages | orderBy:'-date'")
+                .card-heading.image
+                    img(ng-src="img/profile-32.png", alt="")
+                    .card-heading-header
+                        h3 {{message.user}}
+                        span {{message.date | date:"dd.MM.yyyy hh:mm"}}
+                .card-body
+                    p {{message.text}}
+                .card-actions
+                    button.btn.btn-default.btn-small Leider Geil
+                    button.btn.btn-default.btn-small Teilen
+                .card-comments
+                    .comments-collapse-toggle
+                        a Test
+                            i.icon-angle-down
+        .col-xs-6.col-sm-2
