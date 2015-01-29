@@ -2,7 +2,7 @@
 
 
 // Declare app level module which depends on filters, and services
-var myApp = angular.module('myApp', ['ngRoute']).
+var myApp = angular.module('myApp', ['ngRoute','ui.bootstrap', 'ngDropdowns']).
   config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
     $routeProvider.when('/profile', {templateUrl: 'partial/profile', controller: ProfileController});
     $routeProvider.when('/search', {templateUrl: 'partial/search', controller: SearchController});

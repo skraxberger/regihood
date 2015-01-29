@@ -20,7 +20,7 @@ function ProfileController() {
 function SearchController() {
 }
 
-myApp.controller("MessageController", function ($scope, $http) {
+myApp.controller("MessageController", function ($scope, $http, $modal) {
     $scope.post = {};
     $scope.messages = [];
     $scope.news = [];
@@ -71,6 +71,61 @@ myApp.controller("MessageController", function ($scope, $http) {
                 console.log('Error: ' + data);
             });
     };
+
+    $scope.items = ['item1', 'item2', 'item3'];
+
+    $scope.openSomething = function(size) {
+        var modalInstance = $modal.open({
+            templateUrl: 'myModalContent.html',
+            controller: 'ModalInstanceCtrl',
+            size: size,
+            resolve: {
+                items: function () {
+                    return $scope.items;
+                }
+            }
+        });
+
+        modalInstance.result.then(function (selectedItem) {
+            $scope.selected = selectedItem;
+        }, function () {
+            console.log('Modal dismissed at: ' + new Date());
+        });
+    };
+
+    $scope.ddMenuOptions3 = [
+        {
+            text: 'Löschen',
+            iconCls: 'someicon'
+        }, {
+            text: 'Ausblenden'
+        }, {
+            divider: true
+        }, {
+            text: 'Linked',
+            href: 'http://www.google.com'
+        }
+    ];
+
+    $scope.ddMenuSelected3 = {};
 });
 
+// Please note that $modalInstance represents a modal window (instance) dependency.
+// It is not the same as the $modal service used above.
+
+myApp.controller('ModalInstanceCtrl', function ($scope, $modalInstance, items) {
+
+    $scope.items = items;
+    $scope.selected = {
+        item: $scope.items[0]
+    };
+
+    $scope.ok = function () {
+        $modalInstance.close($scope.selected.item);
+    };
+
+$scope.cancel = function () {
+    $modalInstance.dismiss('cancel');
+};
+});
 

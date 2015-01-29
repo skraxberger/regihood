@@ -1,6 +1,44 @@
 /* app css stylesheet */
 body {
-	padding-top: 70px;
+    padding-top: 70px;
+}
+
+.caret-right {
+    margin-right: 5px;
+}
+
+.modal {
+    display: block;
+}
+
+/* Custom dialog/modal headers */
+
+.dialog-header-error {
+    background-color: #d2322d;
+}
+
+.dialog-header-wait {
+    background-color: #428bca;
+}
+
+.dialog-header-notify {
+    background-color: #eeeeee;
+}
+
+.dialog-header-confirm {
+    background-color: #333333;
+}
+
+.dialog-header-error span, .dialog-header-error h4,
+.dialog-header-wait span, .dialog-header-wait h4,
+.dialog-header-confirm span, .dialog-header-confirm h4 {
+    color: #ffffff;
+}
+
+/* Ease Display */
+
+.pad {
+    padding: 25px;
 }
 
 .simplebox {
@@ -687,8 +725,6 @@ button.card-btn.card-btn-mini, input[type="submit"].card-btn.card-btn-mini {
     border-bottom: 1px solid #e5e5e5
 }
 
-
-
 .card .card-heading.image img {
     display: inline-block;
     width: 46px;
@@ -898,7 +934,6 @@ button.card-btn.card-btn-mini, input[type="submit"].card-btn.card-btn-mini {
     padding: 0 20px;
     margin-bottom: 17px
 }
-
 
 .footer {
     bottom: 30px;

@@ -1,0 +1,13 @@
+//
+   Created by skraxberger on 29.01.2015.
+script(type="text/ng-template", id="myModalContent.html")
+    .modal-header
+        h3.modal-title I'm a modal!
+    .modal-body
+        ul
+            li(ng-repeat="item in items")
+                a(ng-click="selected.item = item") {{ item }}
+        | Selected: <b>{{ selected.item }}</b>
+    .modal-footer
+        button.btn.btn-primary(ng-click="ok()") OK
+        button.btn.btn-warning(ng-click="cancel()") Cancel
