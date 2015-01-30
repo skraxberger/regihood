@@ -5,7 +5,8 @@ var mongoose = require('mongoose'), Schema = mongoose.Schema, passportLocalMongo
 
 var Account = new Schema({
 	username : String,
-	password : String
+	password : String,
+    loggedIn : { type: Boolean, default: false}
 });
 
 Account.plugin(passportLocalMongoose);

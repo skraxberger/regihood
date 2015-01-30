@@ -20,7 +20,7 @@ module.exports = function (app) {
     });
 
     app.post('/register', function (req, res) {
-        Account.register(new Account({username: req.body.username}), req.body.password, function (err, account) {
+        Account.register(new Account({username: req.body.firstname + " " + req.body.lastname}), req.body.password, function (err, account) {
             if (err) {
                 res.render('index', {account: account});
             }
@@ -79,7 +79,7 @@ module.exports = function (app) {
         // create a message information comes from AJAX request from Angular
         Message.create({
             text : req.body.text,
-            done : false
+            user : req.session.passport.user
         }, function(err, message) {
             if (err)
                 res.send(err);
@@ -94,7 +94,23 @@ module.exports = function (app) {
 
     });
 
-    // delete a todo
+    // update a message
+    app.post('/api/messages/:message_id', function (req, res) {
+        var query = {_id: req.params.message_id};
+        Message.findOneAndUpdate(query, {text: req.body.text}, function (err, message) {
+            if (err)
+                res.send(err);
+
+            // get and return all the messages after you create another
+            Message.find(function (err, messages) {
+                if (err)
+                    res.send(err)
+                res.json(messages);
+            });
+        });
+    });
+
+    // delete a message
     app.delete('/api/messages/:message_id', function(req, res) {
         Message.remove({
             _id : req.params.message_id
@@ -110,11 +126,6 @@ module.exports = function (app) {
             });
         });
     });
-
-    app.get('/test', function (req, res) {
-        res.render('test');
-    });
-
 
     app.get('*', function (req, res) {
         res.render('index', {user: req.user});

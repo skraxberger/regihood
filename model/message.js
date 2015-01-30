@@ -8,6 +8,8 @@ var Schema = mongoose.Schema;
 var Message = new Schema({
     user : String,
     text : String,
+    editEnabled : { type: Boolean, default: false},
+    likes : [],
     date : { type: Date, default: Date.now }
 });
 

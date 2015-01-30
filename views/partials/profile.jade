@@ -30,17 +30,29 @@
                         i.fa.fa-angle-down.caret-right.dropdown-toggle(dropdown-toggle)
                         ul.dropdown-menu(role="menu")
                             li
-                                a(href="#") Löschen
+                                a(href="", ng-click="optionMenuClick(1,message)") Löschen
                             li
-                                a(href="#") Sonstwas
+                                a(href="", ng-click="optionMenuClick(2, message)") Ausblenden
+                            li.divider
+                            li
+                                a(href="", ng-click="optionMenuClick(3,message)") Editieren
                 .card-heading.image
                     img(ng-src="img/profile-32.png", alt="")
                     .card-heading-header
-                        h3 test
+                        h3 {{message.user}}
                         span {{message.date | date:"dd.MM.yyyy hh:mm"}}
                 .card-body
-                    p {{message.text}}
+                    div(ng-hide="message.editEnabled")
+                        {{message.text}}
+                    div(ng-show="message.editEnabled")
+                        textarea.form-control.simplebox(ng-model="message.text", style="background-color: #E5E5E5;")
+                        .clearfix
+                            button.btn.btn-primary.pull-right(type="submit", ng-click="updateMessage(message)") Teilen
                 .card-actions
-                    button.btn.btn-default.btn-small Leider Geil
-                    button.btn.btn-default.btn-small Teilen
+                    a(href="", ng-click="like(message)") Super Geil
+                    span.pad-xs
+                    span ·
+                    a(href="", ng-click="share(message)")  Teilen
+                 .card-comments(ng-show="message.likes")
+
         .col-xs-6.col-sm-2

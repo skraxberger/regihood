@@ -20,7 +20,7 @@ function ProfileController() {
 function SearchController() {
 }
 
-myApp.controller("MessageController", function ($scope, $http, $modal) {
+myApp.controller("MessageController", function ($scope, $http) {
     $scope.post = {};
     $scope.messages = [];
     $scope.news = [];
@@ -45,6 +45,29 @@ myApp.controller("MessageController", function ($scope, $http, $modal) {
             console.log('Error: ' + data);
         });
 
+    $scope.optionMenuClick = function(type, message) {
+        if(type === 1) {
+            $http.delete('/api/messages/' + message._id)
+                .success(function (data) {
+                    $scope.messages = data;
+                    console.log(data);
+                })
+                .error(function (data) {
+                    console.log('Error: ' + data);
+                });
+        }
+        else if(type === 2) {
+
+        }
+        else if(type === 3) {
+            message.editEnabled = true;
+        }
+        else {
+            console.log("Unrecognized type found in option menu click.");
+        }
+
+        console.log(message.text);
+    };
 
     // when submitting the add form, send the text to the node API
     $scope.createMessage = function () {
@@ -52,6 +75,18 @@ myApp.controller("MessageController", function ($scope, $http, $modal) {
         $http.post('/api/messages', $scope.post)
             .success(function (data) {
                 $scope.post = {}; // clear the form so our user is ready to enter another
+                $scope.messages = data;
+                console.log(data);
+            })
+            .error(function (data) {
+                console.log('Error: ' + data);
+            });
+    };
+
+    // update message
+    $scope.updateMessage = function(message) {
+        $http.post('/api/messages/' + message._id, message)
+            .success(function (data) {
                 $scope.messages = data;
                 console.log(data);
             })
@@ -71,61 +106,5 @@ myApp.controller("MessageController", function ($scope, $http, $modal) {
                 console.log('Error: ' + data);
             });
     };
-
-    $scope.items = ['item1', 'item2', 'item3'];
-
-    $scope.openSomething = function(size) {
-        var modalInstance = $modal.open({
-            templateUrl: 'myModalContent.html',
-            controller: 'ModalInstanceCtrl',
-            size: size,
-            resolve: {
-                items: function () {
-                    return $scope.items;
-                }
-            }
-        });
-
-        modalInstance.result.then(function (selectedItem) {
-            $scope.selected = selectedItem;
-        }, function () {
-            console.log('Modal dismissed at: ' + new Date());
-        });
-    };
-
-    $scope.ddMenuOptions3 = [
-        {
-            text: 'Löschen',
-            iconCls: 'someicon'
-        }, {
-            text: 'Ausblenden'
-        }, {
-            divider: true
-        }, {
-            text: 'Linked',
-            href: 'http://www.google.com'
-        }
-    ];
-
-    $scope.ddMenuSelected3 = {};
-});
-
-// Please note that $modalInstance represents a modal window (instance) dependency.
-// It is not the same as the $modal service used above.
-
-myApp.controller('ModalInstanceCtrl', function ($scope, $modalInstance, items) {
-
-    $scope.items = items;
-    $scope.selected = {
-        item: $scope.items[0]
-    };
-
-    $scope.ok = function () {
-        $modalInstance.close($scope.selected.item);
-    };
-
-$scope.cancel = function () {
-    $modalInstance.dismiss('cancel');
-};
 });
 
