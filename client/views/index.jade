@@ -1,0 +1,13 @@
+extends layout
+
+block body
+  if (!user)
+    include includes/navbar_logged_out
+    include includes/logged_out
+  else
+    include includes/navbar_logged_in
+    include includes/logged_in
+
+block extraJS
+  if(!user)
+    script(src="js/validate.js")
