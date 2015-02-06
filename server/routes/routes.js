@@ -2,8 +2,6 @@
  * New node file
  */
 var passport = require('passport');
-var userRoles = require('../../client/js/routingConfig').userRoles;
-var accessLevels = require('../../client/js/routingConfig').accessLevels;
 
 var Account = require('../model/account');
 var Message = require('../model/message');
@@ -29,14 +27,14 @@ module.exports = function (app) {
             }
 
             passport.authenticate('local', {
-                successRedirect: '/profile',
+                successRedirect: '/stream',
                 failureRedirect: '/'
             });
         });
     });
 
     app.post('/login', passport.authenticate('local', {
-        successRedirect: '/profile',
+        successRedirect: '/stream',
         failureRedirect: '/'
     }));
 
@@ -134,4 +132,4 @@ module.exports = function (app) {
         res.render('index', {user: req.user});
     });
 
-}
+};

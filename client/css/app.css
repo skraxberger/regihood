@@ -23,6 +23,18 @@ body {
     padding: 2px;
 }
 
+.btn.active {
+    background-color: #61bbd8;
+}
+
+.jumbotron.cover {
+    padding: 2px 2px;
+    margin-bottom: 0;
+    margin-left: 0;
+    color: inherit;
+    background-color: #eee;
+}
+
 .simplebox {
     outline: none;
     border: none !important;

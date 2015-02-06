@@ -20,7 +20,23 @@ function ProfileController() {
 function SearchController() {
 }
 
-myApp.controller("MessageController", function ($scope, $http) {
+regihoodApp.controller("AreaController", function ($scope, $http) {
+    $scope.areas =  [ { id: 1, name: "Info"}, {id: 2, name: "Markt"} ];
+    $scope.areaModel = { id: 1 };
+
+    $scope.switch = function(area) {
+        if(area === 1)
+            $scope.$state.go('stream');
+        else
+            $scope.$state.go('market');
+    };
+});
+
+regihoodApp.controller("ProfileController", function ($scope) {
+   $scope.coverImgPath = "img/cover.jpg";
+});
+
+regihoodApp.controller("MessageController", function ($scope, $http) {
     $scope.post = {};
     $scope.messages = [];
     $scope.news = [];

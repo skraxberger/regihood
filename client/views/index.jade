@@ -1,13 +1,33 @@
-extends layout
+doctype html
+html(data-ng-app="regihoodApp")
+    head
+        meta(charset='utf8')
+        base(href='/')
+        title Regihood
+        link(href='/css/app.css', rel='stylesheet')
+        link(href="/components/bootstrap/dist/css/bootstrap.min.css", rel="stylesheet")
+        link(href="/components/font-awesome/css/font-awesome.min.css", rel="stylesheet")
+        link(href="/components/bootstrap-social/bootstrap-social.css", rel="stylesheet")
+    body(style="background-color: #E5E5E5;")
+        .container
+            pre#uiRouterInfo
+                | $state = {{$state.current.name}}
+                | $stateParams = {{$stateParams}}
+                | $state full url = {{ $state.$current.url.source }}
 
-block body
-  if (!user)
-    include includes/navbar_logged_out
-    include includes/logged_out
-  else
-    include includes/navbar_logged_in
-    include includes/logged_in
+        if (!user)
+            include includes/navbar_logged_out
+            include includes/logged_out
+        else
+            include includes/navbar_logged_in
+            include includes/logged_in
 
-block extraJS
-  if(!user)
-    script(src="js/validate.js")
+        script(src='/components/angular/angular.js')
+        script(src='/components/angular-ui-router/release/angular-ui-router.js')
+        script(src='/components/angular-bootstrap/ui-bootstrap-tpls.js')
+        script(src='/js/app.js')
+        script(src='/js/controllers.js')
+        script(src='/js/directives.js')
+        script(src='/components/jquery/dist/jquery.min.js')
+        script(src='/components/bootstrap/dist/js/bootstrap.min.js')
+    block extraJS

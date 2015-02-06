@@ -7,28 +7,22 @@
                 span.icon-bar
                 span.icon-bar
                 span.icon-bar
-            a.navbar-brand(href='#') OPEN
+            a.navbar-brand(href='', ui-sref="home") Regihood
         .navbar-collapse.collapse
             ul.nav.navbar-nav
-                li.active
-                    a(href='#stream') Home
-                li
-                    a(href='#news') Neues
-                li
-                    a(href='#contact') Contact
+                .btn-group(data-ng-controller="AreaController")
+                    button.btn(data-ng-repeat="area in areas", ng-model="areaModel.id", ng-change="switch(areaModel.id)", btn-radio="area.id") {{area.name}}
             ul.nav.navbar-nav.navbar-right
                 li.dropdown
-                    a.dropdown-toggle(href='#', data-toggle='dropdown')
+                    a.dropdown-toggle(href="" ui-sref='home', data-toggle='dropdown')
                         | Dropdown
                         span.caret
                     ul.dropdown-menu(role='menu')
                         li
-                            a(href='/profile') Profil
+                            a(href="", ui-sref='profile') Profil
                         li
-                            a(href='#') Gruppen
-                        li
-                            a(href='#') Einstellungen
+                            a(href="", ui-sref='settings') Einstellungen
                         li.divider
                         li
-                            a(href='/logout') Abmelden
+                            a(href="", ui-sref='logout') Abmelden
         // /.nav-collapse

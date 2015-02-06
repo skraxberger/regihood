@@ -1,0 +1,60 @@
+//
+   Created by skraxberger on 04.02.2015.
+
+#wrap(ng-controller="MessageController as msgCtrl")
+    .row
+        .col-xs-6.col-sm-2
+            .card.special
+                .card-heading
+                    .card-heading-header
+                        h6 Aktuelles
+        .col-xs-6.col-sm-7
+            .card.special
+                .card-heading
+                    .card-heading-header
+                        h6 Mein Blabla
+                .card-body
+                    textarea.form-control.simplebox(placeholder="Nachricht", ng-model="post.text", name="messagebox", id="messagebox", style="background-color: #E5E5E5;")
+                .card-actions
+                    .clearfix
+                        button.btn.btn-primary.pull-right(type="submit", ng-click="createMessage()") Teilen
+        .col-xs-6.col-sm-3
+            .card.special
+                .card-heading
+                    h6 Neuigkeiten
+                .card-body(ng-repeat="item in news")
+                    p {{item.text}}
+    .row
+        .col-xs-6.col-sm-2
+        .col-xs-6.col-sm-7
+            .card.special(ng-repeat="message in messages | orderBy:'-date'")
+                .clearfix
+                    .pull-right.dropdown(dropdown on-toggle="toggle(open)")
+                        i.fa.fa-angle-down.caret-right.dropdown-toggle(dropdown-toggle)
+                        ul.dropdown-menu(role="menu")
+                            li
+                                a(href="", ng-click="optionMenuClick(1,message)") Löschen
+                            li
+                                a(href="", ng-click="optionMenuClick(2, message)") Ausblenden
+                            li.divider
+                            li
+                                a(href="", ng-click="optionMenuClick(3,message)") Editieren
+                .card-heading.image
+                    img(ng-src="img/profile-32.png", alt="")
+                    .card-heading-header
+                        h3 {{message.user}}
+                        span {{message.date | date:"dd.MM.yyyy hh:mm"}}
+                .card-body
+                    div(ng-hide="message.editEnabled")
+                        {{message.text}}
+                    div(ng-show="message.editEnabled")
+                        textarea.form-control.simplebox(ng-model="message.text", style="background-color: #E5E5E5;")
+                        .clearfix
+                        button.btn.btn-primary.pull-right(type="submit", ng-click="updateMessage(message)") Teilen
+                .card-actions
+                    a(href="", ng-click="like(message)") Super Geil
+                        span.pad-xs
+                            span ·
+                        a(href="", ng-click="share(message)")  Teilen
+                .card-comments(ng-show="message.likes")
+        .col-xs-6.col-sm-2
