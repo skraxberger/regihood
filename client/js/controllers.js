@@ -21,19 +21,23 @@ function SearchController() {
 }
 
 regihoodApp.controller("AreaController", function ($scope, $http) {
-    $scope.areas =  [ { id: 1, name: "Info"}, {id: 2, name: "Markt"} ];
-    $scope.areaModel = { id: 1 };
 
-    $scope.switch = function(area) {
-        if(area === 1)
-            $scope.$state.go('stream');
+    $scope.currentArea = false;
+
+    $scope.switch = function () {
+        if ($scope.currentArea === true)
+            $scope.$state.go('home');
         else
             $scope.$state.go('market');
     };
 });
 
 regihoodApp.controller("ProfileController", function ($scope) {
-   $scope.coverImgPath = "img/cover.jpg";
+    $scope.coverImgPath = "img/cover.jpg";
+    $scope.coverChangeVisible = false;
+    $scope.changeCoverChangeVisibility = function(visibilty) {
+        $scope.coverChangeVisible = visibilty;
+    };
 });
 
 regihoodApp.controller("MessageController", function ($scope, $http) {
@@ -61,8 +65,8 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
             console.log('Error: ' + data);
         });
 
-    $scope.optionMenuClick = function(type, message) {
-        if(type === 1) {
+    $scope.optionMenuClick = function (type, message) {
+        if (type === 1) {
             $http.delete('/api/messages/' + message._id)
                 .success(function (data) {
                     $scope.messages = data;
@@ -72,10 +76,10 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
                     console.log('Error: ' + data);
                 });
         }
-        else if(type === 2) {
+        else if (type === 2) {
 
         }
-        else if(type === 3) {
+        else if (type === 3) {
             message.editEnabled = true;
         }
         else {
@@ -100,7 +104,7 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     };
 
     // update message
-    $scope.updateMessage = function(message) {
+    $scope.updateMessage = function (message) {
         $http.post('/api/messages/' + message._id, message)
             .success(function (data) {
                 $scope.messages = data;

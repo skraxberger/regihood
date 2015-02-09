@@ -27,12 +27,64 @@ body {
     background-color: #61bbd8;
 }
 
-.jumbotron.cover {
-    padding: 2px 2px;
-    margin-bottom: 0;
-    margin-left: 0;
-    color: inherit;
-    background-color: #eee;
+.profile-cover
+{
+    background-image:url('../img/cover.jpg');
+    height: 300px;
+    background-size: cover;
+}
+
+.profile-image
+{
+    margin-top:240px;
+    width:120px;
+    margin-left:50px;
+    margin-bottom:-60px;
+}
+
+.profile-cover-change
+{
+    margin-top:240px;
+}
+
+.area-switcher
+{
+    margin-top:100px;
+}
+
+.name
+{
+    position:absolute;
+    padding-left:200px;
+    font-size:30px;
+}
+
+.btn-style{
+    color: #fff;
+    background-color: #007FBE;
+    border-color: #adadad;
+    width: 33.3%;
+}
+
+.btn-style:hover {
+    color: #333;
+    background-color: #3D5DE0;
+    border-color: #adadad;
+    width: 33.3%;
+
+}
+
+
+@media (max-width: 767px) {
+    .header{
+        text-align : center;
+    }
+
+
+
+    .nav{
+        margin-top : 30px;
+    }
 }
 
 .simplebox {
