@@ -12,6 +12,7 @@ var express = require('express'),
     session = require('express-session'),
     passport = require('passport'),
     jade = require('jade'),
+    multer = require('multer'),
     csrf = require('csurf'),
     mongoose = require('mongoose'),
     LocalStrategy = require('passport-local'),
@@ -48,7 +49,7 @@ var app_status = process.env.NODE_ENV || 'development';
 
 app.use(passport.initialize());
 app.use(passport.session());
-
+app.use(multer());
 
 //passport config
 var Account = require('./server/model/account');

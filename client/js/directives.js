@@ -23,8 +23,8 @@ regihoodApp.directive('areaToggle', [
                 element.bootstrapToggle({
                     on: 'Sozial',
                     off: 'Markt',
-                    onstyle: "success",
-                    offstyle: "danger"
+                    onstyle: "info",
+                    offstyle: "success"
                 });
 
                 element.on('change.areaToggle', function (event) {
@@ -47,3 +47,4 @@ regihoodApp.directive('areaToggle', [
         };
     }
 ]);
+

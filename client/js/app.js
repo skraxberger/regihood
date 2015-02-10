@@ -2,7 +2,7 @@
 
 
 // Declare app level module which depends on filters, and services
-var regihoodApp = angular.module('regihoodApp', ['ui.router', 'ui.bootstrap']);
+var regihoodApp = angular.module('regihoodApp', ['ui.router', 'ui.bootstrap', 'angularFileUpload']);
 
 
 /*
@@ -60,6 +60,11 @@ regihoodApp.config(
                 .state('market', {
                     url: '/market',
                     templateUrl: 'partial/market'
+                })
+
+                .state('settings', {
+                    url: 'settings',
+                    templateUrl: 'partial/settings'
                 })
 
                 .state('logout', {

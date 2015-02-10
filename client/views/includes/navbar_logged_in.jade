@@ -1,6 +1,6 @@
 // Fixed navbar
-.navbar.navbar-default.navbar-fixed-top(role='navigation')
-    .container(ng-controller="AreaController as areaCtrl")
+nav.navbar.navbar-default.navbar-fixed-top(role='navigation')
+    .container
         .navbar-header
             button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
                 span.sr-only Toggle navigation
@@ -9,13 +9,20 @@
                 span.icon-bar
             a.navbar-brand(href='', ui-sref="home") Regihood
         .navbar-collapse.collapse
-            ul.nav.navbar-nav
-                input(area-toggle type="checkbox", ng-model="currentArea", ng-init="'on'")
-                {{currentArea}}
+            ul.nav.navbar-nav(ng-controller="AreaButtonController as areaBtnCtrl")
+                //
+                    input(area-toggle type="checkbox", ng-model="area.social", data-size="small")
+                a(href='', ui-sref="home")
+                    button.btn.btn-sm.margin-top(ng-class="{true: 'btn-primary', false: 'btn-default'}[socialActive]" ng-click="toggleActive()") Sozial
+                span.space
+                a(href='', ui-sref="market")
+                    button.btn.btn-sm.margin-top(ng-class="{true: 'btn-default', false: 'btn-primary'}[socialActive]" ng-click="toggleActive()") Market
             ul.nav.navbar-nav.navbar-right
+                li
+                    a(href='', ui-sref="profile")
+                        i.glyphicon.glyphicon-user
                 li.dropdown
                     a.dropdown-toggle(href="" ui-sref='home', data-toggle='dropdown')
-                        | Dropdown
                         span.caret
                     ul.dropdown-menu(role='menu')
                         li

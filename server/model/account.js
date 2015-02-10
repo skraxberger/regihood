@@ -6,7 +6,9 @@ var mongoose = require('mongoose'), Schema = mongoose.Schema, passportLocalMongo
 var Account = new Schema({
 	username : String,
 	password : String,
-    loggedIn : { type: Boolean, default: false}
+    loggedIn : { type: Boolean, default: false},
+    coverImage: {type: Buffer},
+    profileImage: {type: Buffer}
 });
 
 Account.plugin(passportLocalMongoose);

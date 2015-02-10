@@ -14,29 +14,43 @@
  }
  */
 
-function ProfileController() {
-}
+regihoodApp.controller("AreaButtonController", function ($scope) {
+    $scope.socialActive = true;
 
-function SearchController() {
-}
-
-regihoodApp.controller("AreaController", function ($scope, $http) {
-
-    $scope.currentArea = false;
-
-    $scope.switch = function () {
-        if ($scope.currentArea === true)
-            $scope.$state.go('home');
-        else
-            $scope.$state.go('market');
-    };
+    $scope.toggleActive = function () {
+        $scope.socialActive = !$scope.socialActive;
+    }
 });
 
-regihoodApp.controller("ProfileController", function ($scope) {
+regihoodApp.controller("ProfileController", function ($scope, $upload) {
     $scope.coverImgPath = "img/cover.jpg";
     $scope.coverChangeVisible = false;
-    $scope.changeCoverChangeVisibility = function(visibilty) {
+
+    $scope.changeCoverChangeVisibility = function (visibilty) {
         $scope.coverChangeVisible = visibilty;
+        console.log(visibilty);
+    };
+
+    $scope.$watch('files', function () {
+        $scope.upload($scope.files);
+    });
+
+    $scope.upload = function (files) {
+        if (files && files.length) {
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                $upload.upload({
+                    url: 'upload',
+                    fields: {'imageType': 'cover'},
+                    file: files
+                }).progress(function (evt) {
+                    var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                    console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
+                }).success(function (data, status, headers, config) {
+                    console.log('file ' + config.file.name + 'uploaded. Response: ' + data);
+                });
+            }
+        }
     };
 });
 
@@ -49,7 +63,6 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     $http.get('/api/messages')
         .success(function (data) {
             $scope.messages = data;
-            console.log(data);
         })
         .error(function (data) {
             console.log('Error: ' + data);
@@ -59,7 +72,6 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     $http.get('/api/news')
         .success(function (data) {
             $scope.news = data;
-            console.log(data);
         })
         .error(function (data) {
             console.log('Error: ' + data);

@@ -1,7 +1,9 @@
 /**
  * New node file
  */
-var passport = require('passport');
+var passport = require('passport'),
+    Busboy = require('busboy'),
+    inspect = require('util').inspect;
 
 var Account = require('../model/account');
 var Message = require('../model/message');
@@ -48,10 +50,18 @@ module.exports = function (app) {
         res.redirect('/');
     });
 
-    app.get('/api/messages', function(req, res) {
+    app.post('/upload', function (req, res) {
+
+        console.log(req.body);
+        console.log(req.files);
+
+    });
+
+
+    app.get('/api/messages', function (req, res) {
 
         // use mongoose to get all todos in the database
-        Message.find(function(err, messages) {
+        Message.find(function (err, messages) {
 
             // if there is an error retrieving, send the error. nothing after res.send(err) will execute
             if (err)
@@ -61,10 +71,10 @@ module.exports = function (app) {
         });
     });
 
-    app.get('/api/news', function(req, res) {
+    app.get('/api/news', function (req, res) {
 
         // use mongoose to get all todos in the database
-        NewsItem.find(function(err, news) {
+        NewsItem.find(function (err, news) {
 
             // if there is an error retrieving, send the error. nothing after res.send(err) will execute
             if (err)
@@ -75,18 +85,18 @@ module.exports = function (app) {
     });
 
     // create message and send back all messages after creation
-    app.post('/api/messages', function(req, res) {
+    app.post('/api/messages', function (req, res) {
 
         // create a message information comes from AJAX request from Angular
         Message.create({
-            text : req.body.text,
-            user : req.session.passport.user
-        }, function(err, message) {
+            text: req.body.text,
+            user: req.session.passport.user
+        }, function (err, message) {
             if (err)
                 res.send(err);
 
             // get and return all the messages after you create another
-            Message.find(function(err, messages) {
+            Message.find(function (err, messages) {
                 if (err)
                     res.send(err)
                 res.json(messages);
@@ -112,15 +122,15 @@ module.exports = function (app) {
     });
 
     // delete a message
-    app.delete('/api/messages/:message_id', function(req, res) {
+    app.delete('/api/messages/:message_id', function (req, res) {
         Message.remove({
-            _id : req.params.message_id
-        }, function(err, message) {
+            _id: req.params.message_id
+        }, function (err, message) {
             if (err)
                 res.send(err);
 
             // get and return all the messages after you create another
-            Message.find(function(err, messages) {
+            Message.find(function (err, messages) {
                 if (err)
                     res.send(err)
                 res.json(messages);

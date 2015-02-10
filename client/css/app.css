@@ -23,6 +23,14 @@ body {
     padding: 2px;
 }
 
+.negativ-margin-top {
+    margin-top: -10px;
+}
+
+.margin-top {
+    margin-top: 7px;
+}
+
 .btn.active {
     background-color: #61bbd8;
 }
@@ -50,6 +58,10 @@ body {
 .area-switcher
 {
     margin-top:100px;
+}
+
+.space{
+    margin-left: 5px;
 }
 
 .name
