@@ -22,14 +22,27 @@ regihoodApp.controller("AreaButtonController", function ($scope) {
     }
 });
 
-regihoodApp.controller("ProfileController", function ($scope, $upload) {
-    $scope.coverImgPath = "img/cover.jpg";
-    $scope.coverChangeVisible = false;
+regihoodApp.controller("ProfileController", function ($scope, $http, $upload) {
 
-    $scope.changeCoverChangeVisibility = function (visibilty) {
-        $scope.coverChangeVisible = visibilty;
-        console.log(visibilty);
+
+    retrieveCoverImage();
+
+    function retrieveCoverImage() {
+        $scope.backgroundImage = '';
+        $scope.image = '';
+
+        $http.get('/api/cover')
+            .success(function (data) {
+                if (data != '') {
+                    $scope.backgroundImage = {background: 'url(' + data + ')'};
+                    $scope.image = data;
+                }
+            })
+            .error(function (data) {
+                console.log("Couldn't obtain cover image");
+            });
     };
+
 
     $scope.$watch('files', function () {
         $scope.upload($scope.files);
@@ -47,7 +60,8 @@ regihoodApp.controller("ProfileController", function ($scope, $upload) {
                     var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
                     console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
                 }).success(function (data, status, headers, config) {
-                    console.log('file ' + config.file.name + 'uploaded. Response: ' + data);
+                    console.log('file ' + config.file.name + 'uploaded.');
+                    retrieveCoverImage();
                 });
             }
         }

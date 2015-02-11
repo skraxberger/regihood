@@ -1,50 +1,32 @@
-/**
- * Created by skraxberger on 06.02.2015.
- */
-regihoodApp.directive('coverImage', function () {
-    return {
-        restrict: "E",
-        replace: true,
-        template: "<div class='cover-image'></div>",
-        link: function (scope, element, attrs) {
-            element.css('height', "300px");
-            element.css('background-size', 'cover');
-            element.css('backgroundImage', "url('img/cover.jpg')");
-        }
-    }
-});
 
-regihoodApp.directive('areaToggle', [
-    function () {
-        return {
-            restrict: 'A',
-            require: '?ngModel',
-            link: function (scope, element, attrs, ngModel) {
-                element.bootstrapToggle({
-                    on: 'Sozial',
-                    off: 'Markt',
-                    onstyle: "info",
-                    offstyle: "success"
-                });
+regihoodApp.directive('dragImage', ['$document', function($document) {
+        return function(scope, element, attr) {
+            var startY = 0, y = 0;
 
-                element.on('change.areaToggle', function (event) {
-                    if (ngModel) {
-                        console.log("Checkbox value: " + element[0].checked);
-                        console.log("Model value: " + ngModel.$modelValue);
-                        //ngModel.$modelValue = element[0].checked;
-                        ngModel.$setViewValue(element[0].checked);
-                    }
-                });
+            element.css({
+                position: 'relative',
+                cursor: 'pointer'
+            });
 
-                scope.$watch(attrs.ngModel, function (newValue, oldValue) {
-                    console.log(ngModel.$modelValue);
-                    if(newValue)
-                        scope.$state.go('home');
-                    else
-                        scope.$state.go('market');
+            element.on('mousedown', function(event) {
+                // Prevent default dragging of selected content
+                event.preventDefault();
+                    startY = event.pageY - y;
+                $document.on('mousemove', mousemove);
+                $document.on('mouseup', mouseup);
+            });
+
+            function mousemove(event) {
+                y = event.pageY - startY;
+
+                element.css({
+                    top: y + 'px'
                 });
             }
-        };
-    }
-]);
 
+            function mouseup() {
+                $document.off('mousemove', mousemove);
+                $document.off('mouseup', mouseup);
+            }
+        };
+    }]);

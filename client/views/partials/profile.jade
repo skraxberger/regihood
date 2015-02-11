@@ -1,9 +1,10 @@
 div(ng-controller="ProfileController as profileCtrl")
     .container
         .row
-            .profile-cover(ng-mouseover="coverChangeVisible = true", ng-mouseout="coverChangeVisible = false", ng-init="coverChangeVisible = false")
+            .profile-cover(ng-mouseenter="coverChangeVisible = true", ng-mouseexit="coverChangeVisible = false", ng-init="coverChangeVisible = false")
+                img.image-box(drag-image ng-src="{{image}}")
                 img.img-thumbnail.img-responsive.profile-image(src="img/profile.jpg")
-                a.btn.btn-xs.btn-primary.pull-right(ng-file-select, style="margin-top:250px;", ng-model="files", ng-show="coverChangeVisible")
+                a.btn.btn-xs.btn-primary.pull-right(ng-file-select, style="margin-top:250px;margin-right:10px", ng-model="files", ng-show="coverChangeVisible")
                     span.glyphicon.glyphicon-picture
                     |  Change cover
         .row(ng-controller="MessageController as msgCtrl")

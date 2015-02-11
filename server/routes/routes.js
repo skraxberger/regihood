@@ -2,12 +2,24 @@
  * New node file
  */
 var passport = require('passport'),
-    Busboy = require('busboy'),
+    fs = require('fs'),
+    lwip = require('lwip'),
+    Gridfs = require('gridfs-stream'),
+    mongoose = require('mongoose'),
     inspect = require('util').inspect;
 
 var Account = require('../model/account');
 var Message = require('../model/message');
 var NewsItem = require('../model/newsitem');
+
+// The mongodb instance created when the mongoose.connection is opened
+var db = mongoose.connection.db;
+
+// The native mongo driver which is used by mongoose
+var mongoDriver = mongoose.mongo;
+
+// Create a gridfs-stream
+var gfs = new Gridfs(db, mongoDriver);
 
 module.exports = function (app) {
 
@@ -55,8 +67,59 @@ module.exports = function (app) {
         console.log(req.body);
         console.log(req.files);
 
+        var file = req.files.file;
+
+        lwip.open(req.files.file.path, function (err, image) {
+            // check 'err'. use 'image'.
+            if (err)
+                console.error("Couldn't open image " + req.files.file + " for resizing");
+            else {
+                var scaleWidth = 1170 / image.width();
+                image.scale(scaleWidth, function (err, scaledImage) {
+                    image.writeFile(req.files.file.path, function (err) {
+                        if(err)
+                            console.log(err);
+                        else
+                            storeInGridFS(req.files.file, req.body, req.session.passport.user, res);
+                    });
+
+
+                });
+            }
+        });
+
+
     });
 
+    app.get('/api/cover', function (req, res) {
+
+        if (req.session.passport) {
+            Account.findOne({username: req.session.passport.user}, function (err, profile) {
+                if (err)
+                    res.send(err);
+                if (profile) {
+                    console.log(profile);
+                    res.send('api/cover/' + profile.coverImage);
+                }
+            });
+        }
+        else {
+            res.send("not available");
+        }
+    });
+
+    app.get('/api/cover/:filename', function (req, res) {
+
+        var query = {filename: req.params.filename};
+
+        var readStream = gfs.createReadStream(query).on('error', function (err) {
+            console.log('Some error!', err);
+        });
+        // and pipe it to Express' response
+        if(typeof readStream != 'undefined')
+            readStream.pipe(res);
+
+    });
 
     app.get('/api/messages', function (req, res) {
 
@@ -143,3 +206,38 @@ module.exports = function (app) {
     });
 
 };
+
+var storeInGridFS = function (file, metadata, user, res) {
+
+    var writestream = gfs.createWriteStream({
+        filename: file.name,
+        mode: 'w',
+        content_type: file.mimetype,
+        metadata: metadata
+    });
+    fs.createReadStream(file.path).pipe(writestream);
+
+    writestream.on('close', function (storedFile) {
+        res.writeHead(200, {"Content-Type": "text/plain"});
+        res.write("Success");
+        res.end();
+
+        fs.unlink(file.path, function (err) {
+            if (err) console.error("Error: " + err);
+            console.log('successfully deleted : ' + file.path);
+        });
+
+        var query = {username: user};
+        console.log(storedFile);
+        Account.findOneAndUpdate(query, {coverImage: file.name}, function (err, message) {
+            if (err)
+                console.error(err);
+            else
+                console.log('Updated cover image for user: ' + user + ' with image: ' + file.name);
+        });
+
+    }).on('error', function (error, file) {
+        console.error(error);
+    });
+
+}

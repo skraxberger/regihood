@@ -7,8 +7,8 @@ var Account = new Schema({
 	username : String,
 	password : String,
     loggedIn : { type: Boolean, default: false},
-    coverImage: {type: Buffer},
-    profileImage: {type: Buffer}
+    coverImage: {type: String, default: 'img/cover.jpg'},
+    profileImage: {type: String, default: 'img/profile.jpg'}
 });
 
 Account.plugin(passportLocalMongoose);
