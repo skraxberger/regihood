@@ -1,6 +1,18 @@
 div(ng-controller="ProfileController as profileCtrl")
     .container
         .row
+            .profile-cover-container(ng-mouseenter="coverChangeVisible = true", ng-mouseleave="coverChangeVisible = false", ng-init="coverChangeVisible = false")
+                .profile-cover-resize-wrapper
+                    img(drag-image ng-src="{{coverImage}}")
+                .profile-image-container(ng-mouseenter="profileChangeVisible = true", ng-mouseleave="profileChangeVisible = false", ng-init="profileChangeVisible = false")
+                    img.img-responsive.img-thumbnail(ng-src="{{profileImage}}")
+                    a.btn.btn-xs.btn-primary.profile-image-change(ng-file-select, ng-model="profile", ng-show="profileChangeVisible")
+                        span.glyphicon.glyphicon-picture
+                        |  Change
+                a.btn.btn-xs.btn-primary.pull-right.profile-cover-change(ng-file-select, ng-model="cover", ng-show="coverChangeVisible")
+                    span.glyphicon.glyphicon-picture
+                    |  Change
+           //
             .profile-cover(ng-mouseenter="coverChangeVisible = true", ng-mouseexit="coverChangeVisible = false", ng-init="coverChangeVisible = false")
                 img.image-box(drag-image ng-src="{{image}}")
                 img.img-thumbnail.img-responsive.profile-image(src="img/profile.jpg")
@@ -25,8 +37,10 @@ div(ng-controller="ProfileController as profileCtrl")
                     .card-heading.image
                         img(ng-src="img/profile-32.png", alt="")
                         .card-heading-header
-                            h3 {{message.user}}
-                            span {{message.date | date:"dd.MM.yyyy hh:mm"}}
+                            h3
+                            a(ui-sref="getProfileOfUser({{message.user}})") {{message.user}}
+                            span.space
+                            | {{message.date | date:"dd.MM.yyyy hh:mm"}}
                     .card-body
                         div(ng-hide="message.editEnabled")
                             {{message.text}}

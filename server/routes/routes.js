@@ -74,17 +74,27 @@ module.exports = function (app) {
             if (err)
                 console.error("Couldn't open image " + req.files.file + " for resizing");
             else {
-                var scaleWidth = 1170 / image.width();
-                image.scale(scaleWidth, function (err, scaledImage) {
-                    image.writeFile(req.files.file.path, function (err) {
-                        if(err)
-                            console.log(err);
-                        else
-                            storeInGridFS(req.files.file, req.body, req.session.passport.user, res);
+                if (req.body.imageType == 'profile') {
+                    image.crop(300, 300, function (err, cropedImage) {
+                        cropedImage.writeFile(req.files.file.path, function (err) {
+                            if (err)
+                                console.log(err);
+                            else
+                                storeInGridFS(req.files.file, req.body, req.session.passport.user, res);
+                        });
                     });
-
-
-                });
+                }
+                else {
+                    var scaleWidth = 1170 / image.width();
+                    image.scale(scaleWidth, function (err, scaledImage) {
+                        scaledImage.writeFile(req.files.file.path, function (err) {
+                            if (err)
+                                console.log(err);
+                            else
+                                storeInGridFS(req.files.file, req.body, req.session.passport.user, res);
+                        });
+                    });
+                }
             }
         });
 
@@ -108,6 +118,23 @@ module.exports = function (app) {
         }
     });
 
+    app.get('/api/profile', function (req, res) {
+
+        if (req.session.passport) {
+            Account.findOne({username: req.session.passport.user}, function (err, profile) {
+                if (err)
+                    res.send(err);
+                if (profile) {
+                    console.log(profile);
+                    res.send('api/profile/' + profile.profileImage);
+                }
+            });
+        }
+        else {
+            res.send("not available");
+        }
+    });
+
     app.get('/api/cover/:filename', function (req, res) {
 
         var query = {filename: req.params.filename};
@@ -116,7 +143,20 @@ module.exports = function (app) {
             console.log('Some error!', err);
         });
         // and pipe it to Express' response
-        if(typeof readStream != 'undefined')
+        if (typeof readStream != 'undefined')
+            readStream.pipe(res);
+
+    });
+
+    app.get('/api/profile/:filename', function (req, res) {
+
+        var query = {filename: req.params.filename};
+
+        var readStream = gfs.createReadStream(query).on('error', function (err) {
+            console.log('Some error!', err);
+        });
+        // and pipe it to Express' response
+        if (typeof readStream != 'undefined')
             readStream.pipe(res);
 
     });
@@ -228,12 +268,17 @@ var storeInGridFS = function (file, metadata, user, res) {
         });
 
         var query = {username: user};
+        if (metadata.imageType == 'profile')
+            var update = {profileImage: file.name};
+        else
+            var update = {coverImage: file.name};
+
         console.log(storedFile);
-        Account.findOneAndUpdate(query, {coverImage: file.name}, function (err, message) {
+        Account.findOneAndUpdate(query, update, function (err, message) {
             if (err)
                 console.error(err);
             else
-                console.log('Updated cover image for user: ' + user + ' with image: ' + file.name);
+                console.log('Updated image for user: ' + user + ' with image: ' + file.name);
         });
 
     }).on('error', function (error, file) {

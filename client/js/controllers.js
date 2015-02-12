@@ -26,16 +26,15 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload) {
 
 
     retrieveCoverImage();
+    retrieveProfileImage();
 
     function retrieveCoverImage() {
-        $scope.backgroundImage = '';
-        $scope.image = '';
+        $scope.coverImage = '';
 
         $http.get('/api/cover')
             .success(function (data) {
                 if (data != '') {
-                    $scope.backgroundImage = {background: 'url(' + data + ')'};
-                    $scope.image = data;
+                    $scope.coverImage = data;
                 }
             })
             .error(function (data) {
@@ -43,27 +42,45 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload) {
             });
     };
 
+    function retrieveProfileImage() {
+        $scope.profileImage = '';
 
-    $scope.$watch('files', function () {
-        $scope.upload($scope.files);
+        $http.get('/api/profile')
+            .success(function (data) {
+                if (data != '') {
+                    $scope.profileImage = data;
+                }
+            })
+            .error(function (data) {
+                console.log("Couldn't obtain profile image");
+            });
+    };
+
+    $scope.$watch('cover', function () {
+        $scope.upload($scope.cover, 'cover');
     });
 
-    $scope.upload = function (files) {
-        if (files && files.length) {
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-                $upload.upload({
-                    url: 'upload',
-                    fields: {'imageType': 'cover'},
-                    file: files
-                }).progress(function (evt) {
-                    var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-                    console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
-                }).success(function (data, status, headers, config) {
-                    console.log('file ' + config.file.name + 'uploaded.');
+    $scope.$watch('profile', function () {
+        $scope.upload($scope.profile, 'profile');
+    });
+
+    $scope.upload = function (imageFile, imageType) {
+        if (imageFile && imageFile.length) {
+            var file = imageFile[0];
+            $upload.upload({
+                url: 'upload',
+                fields: {'imageType': imageType},
+                file: file
+            }).progress(function (evt) {
+                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
+            }).success(function (data, status, headers, config) {
+                console.log('file ' + config.file.name + 'uploaded.');
+                if(imageType == 'cover')
                     retrieveCoverImage();
-                });
-            }
+                if(imageType == 'profile')
+                    retrieveProfileImage();
+            });
         }
     };
 });
