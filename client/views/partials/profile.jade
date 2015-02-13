@@ -2,29 +2,37 @@ div(ng-controller="ProfileController as profileCtrl")
     .container
         .row
             .profile-cover-container(ng-mouseenter="coverChangeVisible = true", ng-mouseleave="coverChangeVisible = false", ng-init="coverChangeVisible = false")
-                .profile-cover-resize-wrapper
+                .profile-cover-resize-wrapper(ng-show="repositionCover")
                     img(drag-image ng-src="{{coverImage}}")
+                .profile-cover-wrapper(ng-hide="repositionCover")
+                    img(ng-src="{{coverImage}}")
                 .profile-image-container(ng-mouseenter="profileChangeVisible = true", ng-mouseleave="profileChangeVisible = false", ng-init="profileChangeVisible = false")
                     img.img-responsive.img-thumbnail(ng-src="{{profileImage}}")
-                    a.btn.btn-xs.btn-primary.profile-image-change(ng-file-select, ng-model="profile", ng-show="profileChangeVisible")
-                        span.glyphicon.glyphicon-picture
-                        |  Change
-                a.btn.btn-xs.btn-primary.pull-right.profile-cover-change(ng-file-select, ng-model="cover", ng-show="coverChangeVisible")
-                    span.glyphicon.glyphicon-picture
-                    |  Change
-           //
-            .profile-cover(ng-mouseenter="coverChangeVisible = true", ng-mouseexit="coverChangeVisible = false", ng-init="coverChangeVisible = false")
-                img.image-box(drag-image ng-src="{{image}}")
-                img.img-thumbnail.img-responsive.profile-image(src="img/profile.jpg")
-                a.btn.btn-xs.btn-primary.pull-right(ng-file-select, style="margin-top:250px;margin-right:10px", ng-model="files", ng-show="coverChangeVisible")
-                    span.glyphicon.glyphicon-picture
-                    |  Change cover
+                    //input.profile-cover-change(type="file", id="fileInput", ng-show="profileChangeVisible")
+                    .btn.btn-xs.btn-primary.profile-image-change(ng-file-select, ng-model="profile", ng-show="profileChangeVisible")
+                        img.dropdown-toggle(dropdown-toggle, src="img/camera-32.png")
+                .btn.btn-xs.btn-primary.pull-right.profile-cover-change.dropdown(dropdown ng-show="coverChangeVisible")
+                    img.dropdown-toggle(dropdown-toggle, src="img/camera-32.png")
+                    ul.dropdown-menu(role="menu")
+                        li
+                            a(ng-file-select href="", ng-model="cover") Ändern
+                        li
+                            a(href="", ng-click="repositionCover=true") Anpassen
+                .profile-headline.clearfix
+                    .headline-space
+                    .headline(ng-hide="repositionCover")
+                        a.headline-tag Timeline
+                        span.headline-tag |
+                        a.headline-tag About
+                    .headline(ng-show="repositionCover")
+                        .btn.btn-xs.btn-primary.pull-right.headline-tag(ng-click="repositionCover=false") Abbrechen
+                        .btn.btn-xs.btn-primary.pull-right.headline-tag(ng-click="saveImagePosition()") Speichern
         .row(ng-controller="MessageController as msgCtrl")
             .col-xs-6.col-sm-2
             .col-xs-6.col-sm-7
                 .card.special(ng-repeat="message in messages | filter:{user:'#{user.username}'} | orderBy:'-date'")
                     .clearfix
-                        .pull-right.dropdown(dropdown on-toggle="toggle(open)")
+                        .pull-right.dropdown(dropdown)
                             i.fa.fa-angle-down.caret-right.dropdown-toggle(dropdown-toggle)
                             ul.dropdown-menu(role="menu")
                                 li

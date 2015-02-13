@@ -68,37 +68,28 @@ module.exports = function (app) {
         console.log(req.files);
 
         var file = req.files.file;
-
-        lwip.open(req.files.file.path, function (err, image) {
-            // check 'err'. use 'image'.
-            if (err)
-                console.error("Couldn't open image " + req.files.file + " for resizing");
-            else {
-                if (req.body.imageType == 'profile') {
-                    image.crop(300, 300, function (err, cropedImage) {
-                        cropedImage.writeFile(req.files.file.path, function (err) {
-                            if (err)
-                                console.log(err);
-                            else
-                                storeInGridFS(req.files.file, req.body, req.session.passport.user, res);
-                        });
-                    });
-                }
+        if (req.body.imageType == 'cover') {
+            lwip.open(file.path, function (err, image) {
+                // check 'err'. use 'image'.
+                if (err)
+                    console.error("Couldn't open image " + req.files.file + " for resizing");
                 else {
                     var scaleWidth = 1170 / image.width();
                     image.scale(scaleWidth, function (err, scaledImage) {
-                        scaledImage.writeFile(req.files.file.path, function (err) {
+                        scaledImage.writeFile(file.path, function (err) {
                             if (err)
                                 console.log(err);
                             else
-                                storeInGridFS(req.files.file, req.body, req.session.passport.user, res);
+                                storeInGridFS(file, req.body, req.session.passport.user, res);
                         });
                     });
                 }
-            }
-        });
 
-
+            });
+        }
+        else {
+            storeInGridFS(file, req.body, req.session.passport.user, res);
+        }
     });
 
     app.get('/api/cover', function (req, res) {

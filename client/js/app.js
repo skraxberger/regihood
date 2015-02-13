@@ -2,7 +2,7 @@
 
 
 // Declare app level module which depends on filters, and services
-var regihoodApp = angular.module('regihoodApp', ['ui.router', 'ui.bootstrap', 'angularFileUpload']);
+var regihoodApp = angular.module('regihoodApp', ['ui.router', 'ui.bootstrap', 'angularFileUpload', 'ngImgCrop']);
 
 
 /*

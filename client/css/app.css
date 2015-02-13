@@ -40,8 +40,9 @@ body {
 }
 .profile-cover-wrapper {
     position: relative;
-    display: none;
     width: 100%;
+    height: 276px;
+    overflow: hidden;
 }
 
 .profile-cover-wrapper img {
@@ -65,8 +66,9 @@ body {
     position: absolute;
     width: 150px;
     height: 150px;
-    margin-top: -80px;
+    margin-top: -120px;
     margin-left: 50px;
+    z-index: 10;
 }
 
 
@@ -87,13 +89,40 @@ body {
     display: inline;
 }
 
-
 .profile-cover-change {
     position: relative;
     margin-top: -50px;
     margin-right: 20px;
-    display: inline;
+    z-index: 11;
 }
+
+.profile-headline {
+    position: relative;
+    height: 40px;
+    background: #ffffff;
+}
+
+.profile-headline .headline-space {
+    position: relative;
+    margin-left: 100px;
+}
+.profile-headline .headline {
+    position: relative;
+    margin-left: 220px;
+}
+.profile-headline .headline-tag {
+    position: relative;
+    margin-top: 7px;
+    margin-right: 10px;
+    font-size: 15px;
+}
+.cropArea {
+    background: #E4E4E4;
+    overflow: hidden;
+    width:500px;
+    height:350px;
+}
+
 
 .space {
     margin-left: 5px;

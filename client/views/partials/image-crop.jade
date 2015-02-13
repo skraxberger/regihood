@@ -1,0 +1,9 @@
+//
+.modal-header
+    h3.modal-title {{myHeader}}
+.modal-body
+    .cropArea
+        img-crop(image="myImage" area-type="square" result-image="myCroppedImage")
+.modal-footer
+    button.btn.btn-primary(ng-click="ok()") Speichern
+    button.btn.btn-warning(ng-click="cancel()") Abbrechen

@@ -2,18 +2,6 @@
 
 /* Controllers */
 
-/*
- function AppController($scope, $http) {
- $http({method: 'GET', url: '/api/name'}).
- success(function(data, status, headers, config) {
- $scope.name = 'Test';
- }).
- error(function(data, status, headers, config) {
- $scope.name = 'Error!'
- });
- }
- */
-
 regihoodApp.controller("AreaButtonController", function ($scope) {
     $scope.socialActive = true;
 
@@ -22,8 +10,10 @@ regihoodApp.controller("AreaButtonController", function ($scope) {
     }
 });
 
-regihoodApp.controller("ProfileController", function ($scope, $http, $upload) {
+regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $modal) {
 
+    //$scope.showModal = false;
+    $scope.repositionCover = false;
 
     retrieveCoverImage();
     retrieveProfileImage();
@@ -56,32 +46,37 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload) {
             });
     };
 
+
+    // Watches for newly selected cover image and uploads it if one is present
     $scope.$watch('cover', function () {
-        $scope.upload($scope.cover, 'cover');
+        if ($scope.cover && $scope.cover.length)
+            $scope.upload($scope.cover[0], 'cover');
     });
 
+
+    //angular.element(document.querySelector('#fileInput')).on('change',openImageCrop);
+
     $scope.$watch('profile', function () {
-        $scope.upload($scope.profile, 'profile');
+        if ($scope.profile && $scope.profile.length)
+            openImageCrop($scope.profile[0], $modal, $scope);
     });
 
     $scope.upload = function (imageFile, imageType) {
-        if (imageFile && imageFile.length) {
-            var file = imageFile[0];
-            $upload.upload({
-                url: 'upload',
-                fields: {'imageType': imageType},
-                file: file
-            }).progress(function (evt) {
-                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-                console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
-            }).success(function (data, status, headers, config) {
-                console.log('file ' + config.file.name + 'uploaded.');
-                if(imageType == 'cover')
-                    retrieveCoverImage();
-                if(imageType == 'profile')
-                    retrieveProfileImage();
-            });
-        }
+        var file = imageFile;
+        $upload.upload({
+            url: 'upload',
+            fields: {'imageType': imageType},
+            file: file
+        }).progress(function (evt) {
+            var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+            console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
+        }).success(function (data, status, headers, config) {
+            console.log('file ' + config.file.name + 'uploaded.');
+            if (imageType == 'cover')
+                retrieveCoverImage();
+            if (imageType == 'profile')
+                retrieveProfileImage();
+        });
     };
 });
 
@@ -171,3 +166,66 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     };
 });
 
+regihoodApp.controller('CropImageController', function($scope, $modalInstance, imageFile) {
+    $scope.myImage = imageFile;
+    $scope.myCroppedImage = '';
+
+    $scope.ok = function () {
+
+        //var blob = dataURItoBlob($scope.myCroppedImage);
+
+        $modalInstance.close($scope.myCroppedImage);
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+
+    $scope.myHeader = "Test"
+
+
+});
+
+function getFileFromDataURI(dataURI, name, type) {
+    var binary = atob(dataURI.split(',')[1]);
+    var array = [];
+    for(var i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i));
+    }
+    var blobData = new Blob([new Uint8Array(array)], {type: type});
+
+    var parts = [blobData, 'blob from cropped image', new ArrayBuffer()];
+
+    var croppedFile = new File(parts, name, {
+        lastModified: new Date(0), // optional - default = now
+        type: type // optional - default = ''
+    })
+
+    return croppedFile;
+}
+
+function openImageCrop(imageFile, $modal, $scope) {
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        $scope.$apply(function ($scope) {
+            var modalInstance = $modal.open({
+                templateUrl: 'imageCropDialog',
+                controller: 'CropImageController',
+                resolve: {
+                    imageFile: function () {
+                        return evt.target.result;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (croppedImage) {
+                $scope.upload(getFileFromDataURI(croppedImage, imageFile.name, imageFile.type), 'profile');
+                console.log("Crop");
+            }, function () {
+                console.log('Modal dismissed at: ' + new Date());
+            });
+        });
+    };
+    reader.readAsDataURL(imageFile);
+};
