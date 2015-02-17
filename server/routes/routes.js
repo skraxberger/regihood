@@ -6,7 +6,10 @@ var passport = require('passport'),
     lwip = require('lwip'),
     Gridfs = require('gridfs-stream'),
     mongoose = require('mongoose'),
-    inspect = require('util').inspect;
+    inspect = require('util').inspect,
+    bunyan = require('bunyan');
+
+var logger = bunyan.createLogger({name: 'routing'});
 
 var Account = require('../model/account');
 var Message = require('../model/message');
@@ -24,10 +27,8 @@ var gfs = new Gridfs(db, mongoDriver);
 module.exports = function (app) {
 
     app.get('/', function (req, res) {
-            res.render('index', {user: req.user});
-        }
-    )
-    ;
+        res.render('index', {user: req.user});
+    });
 
     app.get('/partial/:name', function (req, res) {
         var name = req.params.name;
@@ -93,63 +94,43 @@ module.exports = function (app) {
     });
 
     app.get('/api/cover', function (req, res) {
+        getImageFromAccount('cover', req.session.passport, res);
+    });
+
+    app.post('/api/cover', function (req, res) {
 
         if (req.session.passport) {
-            Account.findOne({username: req.session.passport.user}, function (err, profile) {
-                if (err)
-                    res.send(err);
-                if (profile) {
-                    console.log(profile);
-                    res.send('api/cover/' + profile.coverImage);
+            var user = req.session.passport.user;
+            var query = {username: user};
+            var cover = req.body;
+            var update = {coverImagePosition: cover.topPosition};
+
+            Account.findOneAndUpdate(query, update, function (err, message) {
+                if (err) {
+                    logger.error(err);
+                    res.send(200, 'Cover image position not updated');
+                } else {
+                    logger.info({user: req.session.passport.user}, {yPosition: cover.topPosition}, "Cover image position updated");
+                    res.send(200, 'Cover image position updated');
                 }
             });
         }
         else {
-            res.send("not available");
+            logger.error("No user information available. Post to cover not allowed for anonymous");
+            res.send("No user information available. Post to cover not allowed for anonymous");
         }
     });
 
     app.get('/api/profile', function (req, res) {
-
-        if (req.session.passport) {
-            Account.findOne({username: req.session.passport.user}, function (err, profile) {
-                if (err)
-                    res.send(err);
-                if (profile) {
-                    console.log(profile);
-                    res.send('api/profile/' + profile.profileImage);
-                }
-            });
-        }
-        else {
-            res.send("not available");
-        }
+        getImageFromAccount('profile', req.session.passport, res);
     });
 
     app.get('/api/cover/:filename', function (req, res) {
-
-        var query = {filename: req.params.filename};
-
-        var readStream = gfs.createReadStream(query).on('error', function (err) {
-            console.log('Some error!', err);
-        });
-        // and pipe it to Express' response
-        if (typeof readStream != 'undefined')
-            readStream.pipe(res);
-
+        returnImageFromStore('cover', req.params.filename, res);
     });
 
     app.get('/api/profile/:filename', function (req, res) {
-
-        var query = {filename: req.params.filename};
-
-        var readStream = gfs.createReadStream(query).on('error', function (err) {
-            console.log('Some error!', err);
-        });
-        // and pipe it to Express' response
-        if (typeof readStream != 'undefined')
-            readStream.pipe(res);
-
+        returnImageFromStore('profíle', req.params.filename, res);
     });
 
     app.get('/api/messages', function (req, res) {
@@ -277,3 +258,77 @@ var storeInGridFS = function (file, metadata, user, res) {
     });
 
 }
+
+function getImageFromAccount(type, passport, res) {
+
+    var imageDetails = {};
+
+    if (passport) {
+        Account.findOne({username: passport.user}, function (err, profile) {
+            if (err)
+                logger.error(err);
+            if (profile) {
+                logger.info({profile: profile}, {user: passport.user}, "Found and returning profile info");
+
+                imageDetails.imagePosition = profile.coverImagePosition;
+
+                if (type == 'profile')
+                    imageDetails.imagePath = 'api/profile/' + profile.profileImage;
+                else
+                    imageDetails.imagePath = 'api/cover/' + profile.coverImage;
+
+                res.send(JSON.stringify(imageDetails));
+            }
+        });
+    }
+    else {
+        /*
+         TODO: Need to send an empty profile image back to client otherwise the profile image would be a mess.
+         */
+        if (type == 'profile')
+            imageDetails.imagePath = 'api/profile/profile-empty';
+        else
+            imageDetails.imagePath = 'api/cover/cover-empty';
+
+        logger.info(JSON.stringify(imageDetails));
+        res.send(JSON.stringify(imageDetails));
+
+    }
+
+};
+
+function returnImageFromStore(type, imagePath, res) {
+    if (imagePath != "profile-empty") {
+        var query = {filename: imagePath};
+
+        var readStream = gfs.createReadStream(query).on('error', function (err) {
+            logger.error({error: err}, "Couldn't read profile image from ");
+        });
+        // and pipe it to Express' response
+        if (typeof readStream != 'undefined')
+            readStream.pipe(res);
+    }
+    else {
+        fs.readFile('profile-empty.png', function (err, data) {
+            if (err) {
+                logger.error({error: err}, "Couldn't read empty profile image.");
+                res.writeHead(200, "Couldn't find profile image");
+                res.end(data); // Send the file data to the browser.
+            }
+            else {
+                res.writeHead(200, {'Content-Type': 'image/png'});
+                res.end(data); // Send the file data to the browser.
+            }
+        });
+    }
+};
+
+function loggedIn(req, res, next) {
+    if (req.user) {
+        next();
+    } else {
+        res.redirect(301, '/login');
+    }
+}
+
+

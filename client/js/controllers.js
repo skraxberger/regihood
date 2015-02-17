@@ -12,19 +12,20 @@ regihoodApp.controller("AreaButtonController", function ($scope) {
 
 regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $modal) {
 
-    //$scope.showModal = false;
     $scope.repositionCover = false;
+    $scope.coverImage = {topPosition: 0};
+    $scope.profileImage = {path: 'img/profile-empty.png'};
 
     retrieveCoverImage();
     retrieveProfileImage();
 
     function retrieveCoverImage() {
-        $scope.coverImage = '';
 
         $http.get('/api/cover')
             .success(function (data) {
                 if (data != '') {
-                    $scope.coverImage = data;
+                    $scope.coverImage.path = data.imagePath;
+                    $scope.coverImage.topPosition = data.imagePosition;
                 }
             })
             .error(function (data) {
@@ -38,7 +39,7 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $m
         $http.get('/api/profile')
             .success(function (data) {
                 if (data != '') {
-                    $scope.profileImage = data;
+                    $scope.profileImage = {path : data.imagePath};
                 }
             })
             .error(function (data) {
@@ -48,17 +49,17 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $m
 
 
     // Watches for newly selected cover image and uploads it if one is present
-    $scope.$watch('cover', function () {
-        if ($scope.cover && $scope.cover.length)
-            $scope.upload($scope.cover[0], 'cover');
+    $scope.$watch('coverFiles', function () {
+        if ($scope.coverFiles && $scope.coverFiles.length)
+            $scope.upload($scope.coverFiles[0], 'cover');
     });
 
 
     //angular.element(document.querySelector('#fileInput')).on('change',openImageCrop);
 
-    $scope.$watch('profile', function () {
-        if ($scope.profile && $scope.profile.length)
-            openImageCrop($scope.profile[0], $modal, $scope);
+    $scope.$watch('profileFiles', function () {
+        if ($scope.profileFiles && $scope.profileFiles.length)
+            openImageCrop($scope.profileFiles[0], $modal, $scope);
     });
 
     $scope.upload = function (imageFile, imageType) {
@@ -78,6 +79,15 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $m
                 retrieveProfileImage();
         });
     };
+
+    $scope.saveCoverImagePosition = function() {
+        $http.post('/api/cover/', $scope.coverImage)
+            .error(function (error) {
+                console.log('Error: ' + error);
+            });
+
+        $scope.repositionCover = false;
+    }
 });
 
 regihoodApp.controller("MessageController", function ($scope, $http) {

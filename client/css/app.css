@@ -123,6 +123,10 @@ body {
     height:350px;
 }
 
+.image-dragged{
+    position: relative;
+    overflow: hidden;
+}
 
 .space {
     margin-left: 5px;

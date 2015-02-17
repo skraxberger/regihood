@@ -3,19 +3,18 @@ div(ng-controller="ProfileController as profileCtrl")
         .row
             .profile-cover-container(ng-mouseenter="coverChangeVisible = true", ng-mouseleave="coverChangeVisible = false", ng-init="coverChangeVisible = false")
                 .profile-cover-resize-wrapper(ng-show="repositionCover")
-                    img(drag-image ng-src="{{coverImage}}")
+                    img(drag-image ng-src="{{coverImage.path}}")
                 .profile-cover-wrapper(ng-hide="repositionCover")
-                    img(ng-src="{{coverImage}}")
+                    img.image-dragged(ng-src="{{coverImage.path}}", ng-style="{'top': + coverImage.topPosition}")
                 .profile-image-container(ng-mouseenter="profileChangeVisible = true", ng-mouseleave="profileChangeVisible = false", ng-init="profileChangeVisible = false")
-                    img.img-responsive.img-thumbnail(ng-src="{{profileImage}}")
-                    //input.profile-cover-change(type="file", id="fileInput", ng-show="profileChangeVisible")
-                    .btn.btn-xs.btn-primary.profile-image-change(ng-file-select, ng-model="profile", ng-show="profileChangeVisible")
+                    img.img-responsive.img-thumbnail(ng-src="{{profileImage.path}}")
+                    .btn.btn-xs.btn-primary.profile-image-change(ng-file-select, ng-model="profileFiles", ng-show="profileChangeVisible")
                         img.dropdown-toggle(dropdown-toggle, src="img/camera-32.png")
                 .btn.btn-xs.btn-primary.pull-right.profile-cover-change.dropdown(dropdown ng-show="coverChangeVisible")
                     img.dropdown-toggle(dropdown-toggle, src="img/camera-32.png")
                     ul.dropdown-menu(role="menu")
                         li
-                            a(ng-file-select href="", ng-model="cover") Ändern
+                            a(ng-file-select href="", ng-model="coverFiles") Ändern
                         li
                             a(href="", ng-click="repositionCover=true") Anpassen
                 .profile-headline.clearfix
@@ -26,7 +25,7 @@ div(ng-controller="ProfileController as profileCtrl")
                         a.headline-tag About
                     .headline(ng-show="repositionCover")
                         .btn.btn-xs.btn-primary.pull-right.headline-tag(ng-click="repositionCover=false") Abbrechen
-                        .btn.btn-xs.btn-primary.pull-right.headline-tag(ng-click="saveImagePosition()") Speichern
+                        .btn.btn-xs.btn-primary.pull-right.headline-tag(ng-click="saveCoverImagePosition()") Speichern
         .row(ng-controller="MessageController as msgCtrl")
             .col-xs-6.col-sm-2
             .col-xs-6.col-sm-7
