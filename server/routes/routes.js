@@ -7,9 +7,12 @@ var passport = require('passport'),
     Gridfs = require('gridfs-stream'),
     mongoose = require('mongoose'),
     inspect = require('util').inspect,
+    //express = require('express'),
     bunyan = require('bunyan');
 
 var logger = bunyan.createLogger({name: 'routing'});
+
+//var router  = express.Router();
 
 var Account = require('../model/account');
 var Message = require('../model/message');
@@ -25,6 +28,32 @@ var mongoDriver = mongoose.mongo;
 var gfs = new Gridfs(db, mongoDriver);
 
 module.exports = function (app) {
+    /*
+    router.param('id', function(request, response, next, id){
+        returnImageFromStore(req.params.type, req.params.id, res);
+
+        findUserByUsername(
+            username,
+            function(error, user){
+                if (error)
+                    return next(error);
+
+                request.user = user;
+                return next();
+            }
+        );
+    })
+
+    router.get('/cover/:id',
+        function(request, response, next){
+        }
+    );
+    router.get('/profile/:id',
+        function(request, response, next){
+        }
+    );
+    app.use('/api/image', router);
+    */
 
     app.get('/', function (req, res) {
         res.render('index', {user: req.user});
@@ -42,14 +71,17 @@ module.exports = function (app) {
             }
 
             passport.authenticate('local', {
-                successRedirect: '/stream',
+                successRedirect: '/',
                 failureRedirect: '/'
             });
         });
     });
 
+    /*
+    Login is handled by passport which allows for a success and failure redirect.
+     */
     app.post('/login', passport.authenticate('local', {
-        successRedirect: '/stream',
+        successRedirect: '/',
         failureRedirect: '/'
     }));
 
@@ -65,21 +97,18 @@ module.exports = function (app) {
 
     app.post('/upload', function (req, res) {
 
-        console.log(req.body);
-        console.log(req.files);
-
         var file = req.files.file;
         if (req.body.imageType == 'cover') {
             lwip.open(file.path, function (err, image) {
                 // check 'err'. use 'image'.
                 if (err)
-                    console.error("Couldn't open image " + req.files.file + " for resizing");
+                    logger.error({error: err, file: req.files.file}, "Couldn't open image for resizing");
                 else {
                     var scaleWidth = 1170 / image.width();
                     image.scale(scaleWidth, function (err, scaledImage) {
                         scaledImage.writeFile(file.path, function (err) {
                             if (err)
-                                console.log(err);
+                                logger.error({error: err, file: file.path}, "Couldn't save scaled image");
                             else
                                 storeInGridFS(file, req.body, req.session.passport.user, res);
                         });
@@ -93,11 +122,11 @@ module.exports = function (app) {
         }
     });
 
-    app.get('/api/cover', function (req, res) {
-        getImageFromAccount('cover', req.session.passport, res);
-    });
 
-    app.post('/api/cover', function (req, res) {
+    /*
+    Update the cover image position with the information.
+     */
+    app.post('/api/image/cover', function (req, res) {
 
         if (req.session.passport) {
             var user = req.session.passport.user;
@@ -121,15 +150,19 @@ module.exports = function (app) {
         }
     });
 
-    app.get('/api/profile', function (req, res) {
-        getImageFromAccount('profile', req.session.passport, res);
+    app.get('/api/image/cover', function (req, res) {
+        getImageDetailsFromAccount('cover', req.session.passport, res);
     });
 
-    app.get('/api/cover/:filename', function (req, res) {
+    app.get('/api/image/cover/:filename', function (req, res) {
         returnImageFromStore('cover', req.params.filename, res);
     });
 
-    app.get('/api/profile/:filename', function (req, res) {
+    app.get('/api/image/profile', function (req, res) {
+        getImageDetailsFromAccount('profile', req.session.passport, res);
+    });
+
+    app.get('/api/image/profile/:filename', function (req, res) {
         returnImageFromStore('profíle', req.params.filename, res);
     });
 
@@ -235,8 +268,10 @@ var storeInGridFS = function (file, metadata, user, res) {
         res.end();
 
         fs.unlink(file.path, function (err) {
-            if (err) console.error("Error: " + err);
-            console.log('successfully deleted : ' + file.path);
+            if (err)
+                logger.error({error: err}, "Couldn't delete temp file from filesystem");
+            else
+            logger.info({path: file.path}, "Successfully deleted temprary file");
         });
 
         var query = {username: user};
@@ -245,71 +280,78 @@ var storeInGridFS = function (file, metadata, user, res) {
         else
             var update = {coverImage: file.name};
 
-        console.log(storedFile);
         Account.findOneAndUpdate(query, update, function (err, message) {
             if (err)
-                console.error(err);
+                logger.error({error: err}, "Couldn't update account with image file info");
             else
-                console.log('Updated image for user: ' + user + ' with image: ' + file.name);
+                logger.info({image: file.name, user: user}, "Updated image info in user account");
         });
 
     }).on('error', function (error, file) {
-        console.error(error);
+        logger.error({error: error}, "Couldn't store image in database");
     });
 
 }
 
-function getImageFromAccount(type, passport, res) {
+function getImageDetailsFromAccount(type, passport, res) {
 
     var imageDetails = {};
 
     if (passport) {
         Account.findOne({username: passport.user}, function (err, profile) {
             if (err)
-                logger.error(err);
+                logger.error({error: err}, "Couldn't obtain account from database");
             if (profile) {
                 logger.info({profile: profile}, {user: passport.user}, "Found and returning profile info");
 
                 imageDetails.imagePosition = profile.coverImagePosition;
-
-                if (type == 'profile')
-                    imageDetails.imagePath = 'api/profile/' + profile.profileImage;
+                if(type == 'profile')
+                    imageDetails.imageId = profile.profileImage;
                 else
-                    imageDetails.imagePath = 'api/cover/' + profile.coverImage;
-
-                res.send(JSON.stringify(imageDetails));
+                    imageDetails.imageId = profile.coverImage;
             }
+
+            //callback(imageDetails);
+
+
+
+            res.send(JSON.stringify(imageDetails));
         });
     }
     else {
         /*
          TODO: Need to send an empty profile image back to client otherwise the profile image would be a mess.
          */
-        if (type == 'profile')
-            imageDetails.imagePath = 'api/profile/profile-empty';
-        else
-            imageDetails.imagePath = 'api/cover/cover-empty';
+        imageDetails.imageId = 'empty';
 
         logger.info(JSON.stringify(imageDetails));
-        res.send(JSON.stringify(imageDetails));
+
+        //callback(imageDetails);
+
+        //res.send(JSON.stringify(imageDetails));
 
     }
-
 };
 
 function returnImageFromStore(type, imagePath, res) {
-    if (imagePath != "profile-empty") {
+    if (imagePath != "empty") {
         var query = {filename: imagePath};
 
         var readStream = gfs.createReadStream(query).on('error', function (err) {
-            logger.error({error: err}, "Couldn't read profile image from ");
+            logger.error({error: err}, "Couldn't read profile image from database");
         });
         // and pipe it to Express' response
         if (typeof readStream != 'undefined')
             readStream.pipe(res);
     }
     else {
-        fs.readFile('profile-empty.png', function (err, data) {
+        var fileName = 'profile-empty.png';
+
+        if(type == 'cover') {
+            fileName = 'cover-empty.png';
+        }
+
+        fs.readFile(fileName, function (err, data) {
             if (err) {
                 logger.error({error: err}, "Couldn't read empty profile image.");
                 res.writeHead(200, "Couldn't find profile image");
@@ -320,6 +362,7 @@ function returnImageFromStore(type, imagePath, res) {
                 res.end(data); // Send the file data to the browser.
             }
         });
+
     }
 };
 

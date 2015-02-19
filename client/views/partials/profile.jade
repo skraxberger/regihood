@@ -45,7 +45,7 @@ div(ng-controller="ProfileController as profileCtrl")
                         img(ng-src="img/profile-32.png", alt="")
                         .card-heading-header
                             h3
-                            a(ui-sref="getProfileOfUser({{message.user}})") {{message.user}}
+                            a(ng-click="getProfileOfUser(message.user)") {{message.user}}
                             span.space
                             | {{message.date | date:"dd.MM.yyyy hh:mm"}}
                     .card-body

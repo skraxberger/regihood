@@ -48,29 +48,35 @@ regihoodApp.config(
                 // Home //
                 //////////
                 .state('home', {
-                    url: '/',
                     templateUrl: 'partial/stream'
                 })
 
                 .state('profile', {
-                    url: '/profile',
+                    url:"/",
                     templateUrl: 'partial/profile'
+                })
+                .state('public', {
+                    url: "/:user_id",
+                    templateUrl: 'partial/public-profile',
+                    controller: function ($scope, $stateParams) {
+                        $scope.publicProfile = $stateParams.user_id;
+                    },
+                    onEnter: function () {
+                        console.log("enter contacts.detail");
+                    }
                 })
 
                 .state('market', {
-                    url: '/market',
                     templateUrl: 'partial/market'
                 })
 
                 .state('settings', {
-                    url: 'settings',
                     templateUrl: 'partial/settings'
                 })
 
                 .state('logout', {
-                    url: 'logout',
                     templateUrl: 'logout'
-                })
+                });
         }
     ]
 );
@@ -88,3 +94,10 @@ regihoodApp.run(
         }
     ]
 );
+
+
+var loggingModule = angular.module('talis.services.logging', []);
+
+loggingModule.factory("traceService", function () {
+    return ({print: printStackTrace});
+});

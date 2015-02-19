@@ -42,8 +42,10 @@
                 .card-heading.image
                     img(ng-src="img/profile-32.png", alt="")
                     .card-heading-header
-                        h3 {{message.user}}
-                        span {{message.date | date:"dd.MM.yyyy hh:mm"}}
+                        h3
+                            a(ng-click="getProfileOfUser(message.user)") {{message.user}}
+                        span
+                        | {{message.date | date:"dd.MM.yyyy hh:mm"}}
                 .card-body
                     div(ng-hide="message.editEnabled")
                         {{message.text}}
