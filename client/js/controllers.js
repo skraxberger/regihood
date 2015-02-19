@@ -64,17 +64,11 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $m
 });
 
 regihoodApp.controller("PublicProfileController", function($scope,$http) {
-    $scope.repositionCover = false;
-    $scope.coverImage = {path: '', topPosition: 0, id: undefined};
-    $scope.profileImage = {path: '', topPosition: 0, id: undefined};
 
-    retrieveImageDetails($http, 'profile', function(imageDetails) {
-        $scope.profileImage = imageDetails;
+    retrieveProfileInfo($http, function(profileInfo) {
+        $scope.profileInfo = profileInfo;
     })
 
-    retrieveImageDetails($http, 'cover', function(imageDetails) {
-        $scope.coverImage = imageDetails;
-    })
 
 });
 
@@ -246,7 +240,6 @@ function openImageCrop(imageFile, $modal, $scope) {
     reader.readAsDataURL(imageFile);
 };
 
-
 function retrieveImageDetails($http, type, callback, parameters) {
 
     var url = '/api/image/' + type;
@@ -264,5 +257,22 @@ function retrieveImageDetails($http, type, callback, parameters) {
         })
         .error(function (data) {
             console.log("Couldn't obtain cover image");
+        });
+};
+
+function retrieveProfileInfo($http, callback) {
+
+    var url = '/api/v1/profile/' + $scope.user_id;
+    var profileInfo = {};
+
+    $http.get(url, {params: parameters})
+        .success(function (data) {
+            if (data != '') {
+                profileInfo = data;
+                callback(profileInfo);
+            }
+        })
+        .error(function (error) {
+            console.log("Couldn't obtain profile info. Error " + error);
         });
 };

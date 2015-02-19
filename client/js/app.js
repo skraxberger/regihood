@@ -59,7 +59,7 @@ regihoodApp.config(
                     url: "/:user_id",
                     templateUrl: 'partial/public-profile',
                     controller: function ($scope, $stateParams) {
-                        $scope.publicProfile = $stateParams.user_id;
+                        $scope.user_id = $stateParams.user_id;
                     },
                     onEnter: function () {
                         console.log("enter contacts.detail");
