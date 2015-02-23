@@ -13,8 +13,8 @@ regihoodApp.controller("AreaButtonController", function ($scope) {
 regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $modal) {
 
     $scope.repositionCover = false;
-    $scope.coverImage = {path: '', topPosition: 0, id: undefined};
-    $scope.profileImage = {path: '', topPosition: 0, id: undefined};
+    $scope.coverImage = {path: 'img/cover-empty.jpg', topPosition: 0, id: undefined};
+    $scope.profileImage = {path: 'img/profile-empty.png', topPosition: 0, id: undefined};
 
     retrieveImageDetails($http, 'profile', function(imageDetails) {
         $scope.profileImage = imageDetails;
@@ -54,7 +54,7 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $m
     };
 
     $scope.saveCoverImagePosition = function() {
-        $http.post('/api/cover/', $scope.coverImage)
+        $http.post('/api/image/cover/', $scope.coverImage)
             .error(function (error) {
                 console.log('Error: ' + error);
             });
@@ -64,8 +64,9 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $m
 });
 
 regihoodApp.controller("PublicProfileController", function($scope,$http) {
+    $scope.profileInfo = {coverImage: 'img/cover.png', profileImage: 'img/profile.png'};
 
-    retrieveProfileInfo($http, function(profileInfo) {
+    retrieveProfileInfo($http, $scope.user_id, function(profileInfo) {
         $scope.profileInfo = profileInfo;
     })
 
@@ -77,13 +78,25 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     $scope.messages = [];
     $scope.news = [];
 
+    var retrievedMessages = [];
+
+    var maxInitialMessages = 6;
+    var lastIndex = 0;
+
+    // Normal dropdown menu items. If the post is not from the user it must show different actions.
+    //$scope.dropdownMenu = {items: [{id: "delete", name: "Löschen", usertype: 'user'}, {id: "hide" , name: "Verstecken", usertype: 'general'}, {id: "edit", name: "Editieren", usertype: 'user'},{id: "unfollow", name: "Abbestellen", usertype: 'general'}]};
+    var dropdownUser = [{id: "delete", name: "Löschen"}, {id: "hide" , name: "Verstecken"}, {id: "edit", name: "Editieren"}];
+    var dropdownGeneral = [{id: "hide" , name: "Verstecken"}, {id: "unfollow", name: "Abbestellen"}];
+
+
     /*
      When landing on the page, get all messages and show them.
      TODO: In future it should only show the first something and all others should be fetched only if necessary -> Pagination
      */
     $http.get('/api/messages')
         .success(function (data) {
-            $scope.messages = data;
+            retrievedMessages = data;
+            $scope.filterMessages();
         })
         .error(function (data) {
             console.log('Error: ' + data);
@@ -101,22 +114,55 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
             console.log('Error: ' + data);
         });
 
-    $scope.optionMenuClick = function (type, message) {
-        if (type === 1) {
+
+    $scope.getDropDownMenu = function(message) {
+        var result = {};
+
+        if($scope.currentUser == message.user)
+            result = dropdownUser;
+        else
+           result = dropdownGeneral;
+
+
+        return result;
+    }
+
+    $scope.optionMenuClick = function (type, message, index) {
+        if (type === 'delete') {
+            console.log("deleting message");
+            /*
+            Should delete really be delete -> probably not. It should only be removed from the stream.
+             */
+            $scope.deleteMessage(message);
+            /*
             $http.delete('/api/messages/' + message._id)
                 .success(function (data) {
-                    $scope.messages = data;
+                    retrievedMessages = data;
                     console.log(data);
                 })
                 .error(function (data) {
                     console.log('Error: ' + data);
                 });
+              */
         }
-        else if (type === 2) {
+        else if (type === 'hide') {
+            console.log("hiding message");
+
+            message.hidden.push($scope.currentUser);
+
+            $scope.updateMessage(message);
+
+            var index = $scope.messages.indexOf(message);
+            $scope.messages.splice(index, 1);
+
 
         }
-        else if (type === 3) {
+        else if (type === 'edit') {
             message.editEnabled = true;
+            console.log("editing message");
+        }
+        else if(type === 'unfollow') {
+            console.log("Unfollowing message");
         }
         else {
             console.log("Unrecognized type found in option menu click.");
@@ -125,13 +171,23 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         console.log(message.text);
     };
 
+    $scope.filterMessages = function () {
+        console.log("Inside filter messages");
+        var messageLength = retrievedMessages.length;
+
+        for (var index = 0 ; lastIndex < messageLength && index < maxInitialMessages; index++) {
+            $scope.messages.push(retrievedMessages[lastIndex++]);
+        }
+    }
+
     // when submitting the add form, send the text to the node API
     $scope.createMessage = function () {
         $scope.post.user = $scope.user_id;
         $http.post('/api/messages', $scope.post)
             .success(function (data) {
                 $scope.post = {}; // clear the form so our user is ready to enter another
-                $scope.messages = data;
+                retrievedMessages = data;
+                $scope.messages.unshift(data[0]);
                 console.log(data);
             })
             .error(function (data) {
@@ -143,7 +199,7 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     $scope.updateMessage = function (message) {
         $http.post('/api/messages/' + message._id, message)
             .success(function (data) {
-                $scope.messages = data;
+                retrievedMessages = data;
                 console.log(data);
             })
             .error(function (data) {
@@ -152,10 +208,13 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     };
 
     // delete a todo after checking it
-    $scope.deleteMessage = function (id) {
-        $http.delete('/api/messages/' + id)
+
+    $scope.deleteMessage = function (message) {
+        $http.delete('/api/messages/' + message._id)
             .success(function (data) {
-                $scope.messages = data;
+                retrievedMessages = data;
+                var index = $scope.messages.indexOf(message);
+                $scope.messages.splice(index, 1);
                 console.log(data);
             })
             .error(function (data) {
@@ -240,15 +299,18 @@ function openImageCrop(imageFile, $modal, $scope) {
     reader.readAsDataURL(imageFile);
 };
 
-function retrieveImageDetails($http, type, callback, parameters) {
+function retrieveImageDetails($http, type, callback) {
 
     var url = '/api/image/' + type;
     var imageDetails = {};
 
-    $http.get(url, {params: parameters})
+    $http.get(url)
         .success(function (data) {
             if (data != '') {
-                imageDetails.path = 'api/image/' + type + '/' + data.imageId;
+                if(data.imageId === 'img/cover-empty.jpg' || data.imageId === 'img/profile-empty.png')
+                    imageDetails.path = data.imageId;
+                else
+                    imageDetails.path = 'api/image/' + type + '/' + data.imageId;
                 imageDetails.id = data.imageId;
                 imageDetails.topPosition = data.imagePosition;
 
@@ -260,12 +322,12 @@ function retrieveImageDetails($http, type, callback, parameters) {
         });
 };
 
-function retrieveProfileInfo($http, callback) {
+function retrieveProfileInfo($http, user, callback) {
 
-    var url = '/api/v1/profile/' + $scope.user_id;
+    var url = '/api/v1/profile/' + user;
     var profileInfo = {};
 
-    $http.get(url, {params: parameters})
+    $http.get(url)
         .success(function (data) {
             if (data != '') {
                 profileInfo = data;
@@ -275,4 +337,8 @@ function retrieveProfileInfo($http, callback) {
         .error(function (error) {
             console.log("Couldn't obtain profile info. Error " + error);
         });
+};
+
+function unfollowAccount() {
+
 };

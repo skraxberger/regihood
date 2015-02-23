@@ -2,7 +2,7 @@
 
 
 // Declare app level module which depends on filters, and services
-var regihoodApp = angular.module('regihoodApp', ['ui.router', 'ui.bootstrap', 'angularFileUpload', 'ngImgCrop']);
+var regihoodApp = angular.module('regihoodApp', ['ui.router', 'ui.bootstrap', 'angularFileUpload', 'ngImgCrop', 'infinite-scroll']);
 
 
 /*
@@ -48,11 +48,11 @@ regihoodApp.config(
                 // Home //
                 //////////
                 .state('home', {
+                    url: "/",
                     templateUrl: 'partial/stream'
                 })
 
                 .state('profile', {
-                    url:"/",
                     templateUrl: 'partial/profile'
                 })
                 .state('public', {
@@ -95,9 +95,10 @@ regihoodApp.run(
     ]
 );
 
-
+/*
 var loggingModule = angular.module('talis.services.logging', []);
 
 loggingModule.factory("traceService", function () {
     return ({print: printStackTrace});
 });
+*/

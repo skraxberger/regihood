@@ -28,40 +28,19 @@ var mongoDriver = mongoose.mongo;
 var gfs = new Gridfs(db, mongoDriver);
 
 module.exports = function (app) {
-    /*
-     router.param('id', function(request, response, next, id){
-     returnImageFromStore(req.params.type, req.params.id, res);
-
-     findUserByUsername(
-     username,
-     function(error, user){
-     if (error)
-     return next(error);
-
-     request.user = user;
-     return next();
-     }
-     );
-     })
-
-     router.get('/cover/:id',
-     function(request, response, next){
-     }
-     );
-     router.get('/profile/:id',
-     function(request, response, next){
-     }
-     );
-     app.use('/api/image', router);
-     */
 
     app.get('/', function (req, res) {
         res.render('index', {user: req.user});
     });
 
     app.get('/partial/:name', function (req, res) {
-        var name = req.params.name;
-        res.render('partials/' + name, {user: req.user});
+        if (req.isAuthenticated()) {
+            var name = req.params.name;
+            res.render('partials/' + name, {user: req.user});
+        }
+        else {
+            res.redirect('/');
+        }
     });
 
     app.post('/register', function (req, res) {
@@ -154,6 +133,7 @@ module.exports = function (app) {
         // Fetch the story by its ID (storyId) from a database
         // Save the found story object into request object
         request.username = username;
+        next();
 
     });
 
@@ -162,17 +142,19 @@ module.exports = function (app) {
         // Narrow down the search when request.story is provided
         // Save the found element object into request object
         request.imageId = imageId;
+        next();
+
     });
 
     app.get('/api/v1/profile/:username', function (request, response) {
         // Now we automatically get the story and element in the request object
         //{ story: request.story, element: request.element}
-        getProfileInfo(req.session.passport, req.username, res);
+        getProfileInfo(request.session.passport, request.username, response);
     });
 
     app.get('/api/v1/image/:imageId', function (request, response) {
         // Now we automatically get the story and element in the request object
-        getImageFromStore(request.imageid, res);
+        getImageFromStore(request.imageId, response);
 
     });
 
@@ -196,9 +178,17 @@ module.exports = function (app) {
     app.get('/api/messages', function (req, res) {
 
         // use mongoose to get all todos in the database
-        Message.find(function (err, messages) {
+        /*
+         Message.find(function (err, messages) {
 
-            // if there is an error retrieving, send the error. nothing after res.send(err) will execute
+         // if there is an error retrieving, send the error. nothing after res.send(err) will execute
+         if (err)
+         res.send(err)
+
+         res.json(messages); // return all messages in JSON format
+         });
+         */
+        Message.find({hidden: { "$nin" : [req.user.username]}}).where('deleted').equals('false').sort('-date').exec(function (err, messages) {
             if (err)
                 res.send(err)
 
@@ -231,10 +221,11 @@ module.exports = function (app) {
                 res.send(err);
 
             // get and return all the messages after you create another
-            Message.find(function (err, messages) {
+            Message.find({}).where('deleted').equals('false').sort('-date').exec(function (err, messages) {
                 if (err)
                     res.send(err)
-                res.json(messages);
+
+                res.json(messages); // return all messages in JSON format
             });
         });
 
@@ -243,32 +234,39 @@ module.exports = function (app) {
     // update a message
     app.post('/api/messages/:message_id', function (req, res) {
         var query = {_id: req.params.message_id};
-        Message.findOneAndUpdate(query, {text: req.body.text}, function (err, message) {
+        Message.findOneAndUpdate(query, {text: req.body.text, hidden: req.body.hidden}, function (err, message) {
             if (err)
                 res.send(err);
 
+
+            res.json(message);
+
             // get and return all the messages after you create another
-            Message.find(function (err, messages) {
-                if (err)
-                    res.send(err)
-                res.json(messages);
-            });
+            /*
+             Message.find({}).where('deleted').equals('false').sort('-date').exec(function (err, messages) {
+             if (err)
+             res.send(err)
+
+             res.json(messages); // return all messages in JSON format
+             });
+             */
         });
     });
 
     // delete a message
     app.delete('/api/messages/:message_id', function (req, res) {
-        Message.remove({
-            _id: req.params.message_id
-        }, function (err, message) {
+        var query = {_id: req.params.message_id};
+
+        Message.findOneAndUpdate(query, {deleted: true}, function (err, message) {
             if (err)
                 res.send(err);
 
             // get and return all the messages after you create another
-            Message.find(function (err, messages) {
+            Message.find({}).where('deleted').equals('false').sort('-date').exec(function (err, messages) {
                 if (err)
                     res.send(err)
-                res.json(messages);
+
+                res.json(messages); // return all messages in JSON format
             });
         });
     });
@@ -368,7 +366,7 @@ function getProfileInfo(passport, username, response) {
 
     if (passport) {
         privateProfile = false;
-        query = {'username' : passport.user};
+        query = {'username': passport.user};
     }
 
 
@@ -380,7 +378,7 @@ function getProfileInfo(passport, username, response) {
 
             profileInfo.coverImage = '/api/v1/image/' + profile.coverImage;
             profileInfo.profileImage = '/api/v1/image/' + profile.profileImage;
-            profileInfo.imagePosition = profile.coverImagePosition;
+            profileInfo.coverImagePosition = profile.coverImagePosition;
         }
         response.send(JSON.stringify(profileInfo));
     });

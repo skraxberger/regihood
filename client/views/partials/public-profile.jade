@@ -1,20 +1,20 @@
 //
    Created by skraxberger on 18.02.2015.
-div(ng-controller="PublicProfileController")
+div(ng-controller="PublicProfileController as profileCtrl")
     .container
         .row
             .profile-cover-container
                 .profile-cover-wrapper
                     img.image-dragged(ng-src="{{profileInfo.coverImage}}", ng-style="{'top': + profileInfo.coverImagePosition}")
                 .profile-image-container
-                    img.img-responsive.img-thumbnail(ng-src="{{profileInfo.profileImage}}}")
+                    img.img-responsive.img-thumbnail(ng-src="{{profileInfo.profileImage}}")
                 .profile-headline.clearfix
                     .headline-space
                     .headline
                         a.headline-tag Timeline
                         span.headline-tag |
                         a.headline-tag About
-        .row(ng-controller="PublicMessageController")
+        .row(ng-controller="PublicMessageController as msgCtrl")
             .col-xs-6.col-sm-2
             .col-xs-6.col-sm-7
                 .card.special(ng-repeat="message in messages | filter:{user:'#{user.username}'} | orderBy:'-date'")
