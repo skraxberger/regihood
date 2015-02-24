@@ -10,7 +10,11 @@ html
         link(href="components/bootstrap-social/bootstrap-social.css", rel="stylesheet")
         link(href="components/bootstrap-toggle/css/bootstrap-toggle.css" rel="stylesheet")
         link(href="components/ngImgCrop/compile/minified/ng-img-crop.css" rel="stylesheet")
-    body(style="background-color: #E5E5E5;")
+    body(style="background-color: #E5E5E5;", data-ng-app="regihoodApp")
+        pre#uiRouterInfo
+            | $state = {{$state.current.name}}
+            | $stateParams = {{$stateParams}}
+            | $state full url = {{ $state.$current.url.source }}
 
         if (!user)
             include includes/navbar_logged_out

@@ -46,10 +46,16 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $m
             console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
         }).success(function (data, status, headers, config) {
             console.log('file ' + config.file.name + 'uploaded.');
-            if (imageType == 'cover')
-                retrieveCoverImage();
-            if (imageType == 'profile')
-                retrieveProfileImage();
+            if (imageType == 'cover') {
+                retrieveImageDetails($http, 'cover', function (imageDetails) {
+                    $scope.coverImage = imageDetails;
+                })
+            }
+            if (imageType == 'profile') {
+                retrieveImageDetails($http, 'profile', function (imageDetails) {
+                    $scope.profileImage = imageDetails;
+                })
+            }
         });
     };
 
@@ -66,7 +72,7 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $m
 regihoodApp.controller("PublicProfileController", function($scope,$http) {
     $scope.profileInfo = {coverImage: 'img/cover.png', profileImage: 'img/profile.png'};
 
-    retrieveProfileInfo($http, $scope.user_id, function(profileInfo) {
+    retrieveImageDetails($http, $scope.user_id, function(profileInfo) {
         $scope.profileInfo = profileInfo;
     })
 

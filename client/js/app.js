@@ -67,6 +67,7 @@ regihoodApp.config(
                 })
 
                 .state('market', {
+                    url: "/market",
                     templateUrl: 'partial/market'
                 })
 
@@ -75,6 +76,7 @@ regihoodApp.config(
                 })
 
                 .state('logout', {
+                    url: "/logout",
                     templateUrl: 'logout'
                 });
         }

@@ -3,7 +3,7 @@
  */
 var passport = require('passport'),
     fs = require('fs'),
-    lwip = require('lwip'),
+    gm = require('gm'),
     Gridfs = require('gridfs-stream'),
     mongoose = require('mongoose'),
     inspect = require('util').inspect,
@@ -78,6 +78,26 @@ module.exports = function (app) {
 
         var file = req.files.file;
         if (req.body.imageType == 'cover') {
+
+            var image = gm(file.path);
+
+            var width = 0;
+            var height = 0;
+
+            image.size(function (err, size) {
+                    if (!err) {
+                        width = size.width;
+                        height = size.height;
+                    }
+            });
+
+            var scaledImage = image.resize(1170 / width).write(file.path, function (err) {
+                logger.error({error: err, file: file}, "Couldn't resize image");
+            });
+
+
+            storeInGridFS(file, req.body, req.session.passport.user, res);
+            /*
             lwip.open(file.path, function (err, image) {
                 // check 'err'. use 'image'.
                 if (err)
@@ -95,6 +115,7 @@ module.exports = function (app) {
                 }
 
             });
+            */
         }
         else {
             storeInGridFS(file, req.body, req.session.passport.user, res);
