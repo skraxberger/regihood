@@ -10,11 +10,12 @@ html
         link(href="components/bootstrap-social/bootstrap-social.css", rel="stylesheet")
         link(href="components/bootstrap-toggle/css/bootstrap-toggle.css" rel="stylesheet")
         link(href="components/ngImgCrop/compile/minified/ng-img-crop.css" rel="stylesheet")
-    body(style="background-color: #E5E5E5;", data-ng-app="regihoodApp")
-        pre#uiRouterInfo
-            | $state = {{$state.current.name}}
-            | $stateParams = {{$stateParams}}
-            | $state full url = {{ $state.$current.url.source }}
+    body(style="background-color: #E5E5E5;")
+        //
+            pre#uiRouterInfo
+                | $state = {{$state.current.name}}
+                | $stateParams = {{$stateParams}}
+                | $state full url = {{ $state.$current.url.source }}
 
         if (!user)
             include includes/navbar_logged_out
@@ -26,6 +27,7 @@ html
         script(src='components/jquery/dist/jquery.min.js')
         script(src='components/angular/angular.min.js')
         script(src='components/angular-ui-router/release/angular-ui-router.min.js')
+        script(src='components/ui-utils/ui-utils.min.js')
         script(src='components/ng-file-upload/angular-file-upload.min.js')
         script(src='components/ngImgCrop/compile/minified/ng-img-crop.js')
         script(src='components/angular-bootstrap/ui-bootstrap-tpls.min.js')

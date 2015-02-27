@@ -1,7 +1,6 @@
-//
-   Created by skraxberger on 04.02.2015.
-
-#wrap(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user.username}'")
+div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user.username}'")
+    .row
+        p {{currentUser}}
     .row
         .col-xs-6.col-sm-2
             .card.special
@@ -48,11 +47,20 @@
                         div(ng-show="message.editEnabled")
                             textarea.form-control.simplebox(ng-model="message.text", style="background-color: #E5E5E5;")
                             .clearfix
-                            button.btn.btn-primary.pull-right(type="submit", ng-click="updateMessage(message)") Teilen
+                            button.btn.btn-primary.pull-right(type="submit", ng-click="updateMessage(message)") Ändern
                     .card-actions
                         a(href="", ng-click="like(message)") Super Geil
-                            span.pad-xs
-                                span ·
-                            a(href="", ng-click="share(message)")  Teilen
-                    .card-comments(ng-show="message.likes")
+                        span.pad-xs
+                        span ·
+                        a(href="", ng-click="share(message)")  Teilen
+                    .card-comments
+                        div(ng-repeat="comment in message.comments")
+                            .comments
+                                .media
+                                    a.pull-left
+                                        img.media-object(data-src="getCommentUserThumb(comment)" alt="avatar")
+                                .media-body
+                                    h4.media-heading {{comment.author}}
+                                    p {{comment.content}}
+                        input.form-control(ng-model="commentContent", ui-keypress="{13:'submitComment($event, message)'}")
         .col-xs-6.col-sm-2

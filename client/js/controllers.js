@@ -10,56 +10,48 @@ regihoodApp.controller("AreaButtonController", function ($scope) {
     }
 });
 
+/**
+ *
+ */
 regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $modal) {
 
     $scope.repositionCover = false;
-    $scope.coverImage = {path: 'img/cover-empty.jpg', topPosition: 0, id: undefined};
-    $scope.profileImage = {path: 'img/profile-empty.png', topPosition: 0, id: undefined};
+    //$scope.coverImage = {path: 'img/cover-empty.jpg', topPosition: 0, id: undefined};
+    //$scope.profileImage = {path: 'img/profile-empty.png', topPosition: 0, id: undefined};
 
-    retrieveImageDetails($http, 'profile', function(imageDetails) {
-        $scope.profileImage = imageDetails;
-    })
+    $scope.profileInfo = {coverImage: 'img/cover.jpg', profileImage: 'img/profile.jpg', coverImagePosition: 0};
+    /*
+     retrieveImageDetails($http, 'profile', function(imageDetails) {
+     $scope.profileImage = imageDetails;
+     })
 
-    retrieveImageDetails($http, 'cover', function(imageDetails) {
-        $scope.coverImage = imageDetails;
-    })
+     retrieveImageDetails($http, 'cover', function(imageDetails) {
+     $scope.coverImage = imageDetails;
+     })
+     */
+
+    $scope.initCurrentUser = function (currentUser) {
+        $scope.currentUser = currentUser;
+
+        retrieveProfileInfo($http, currentUser, function (profileInfo) {
+            $scope.profileInfo = profileInfo
+        });
+
+    }
+
 
     // Watches for newly selected cover image and uploads it if one is present
     $scope.$watch('coverFiles', function () {
         if ($scope.coverFiles && $scope.coverFiles.length)
-            $scope.upload($scope.coverFiles[0], 'cover');
+            upload($scope, $http, $upload, $scope.coverFiles[0], 'cover');
     });
 
     $scope.$watch('profileFiles', function () {
         if ($scope.profileFiles && $scope.profileFiles.length)
-            openImageCrop($scope.profileFiles[0], $modal, $scope);
+            cropImageAndUpload($upload, $http, $scope.profileFiles[0], $modal, $scope);
     });
 
-    $scope.upload = function (imageFile, imageType) {
-        var file = imageFile;
-        $upload.upload({
-            url: 'upload',
-            fields: {'imageType': imageType},
-            file: file
-        }).progress(function (evt) {
-            var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-            console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
-        }).success(function (data, status, headers, config) {
-            console.log('file ' + config.file.name + 'uploaded.');
-            if (imageType == 'cover') {
-                retrieveImageDetails($http, 'cover', function (imageDetails) {
-                    $scope.coverImage = imageDetails;
-                })
-            }
-            if (imageType == 'profile') {
-                retrieveImageDetails($http, 'profile', function (imageDetails) {
-                    $scope.profileImage = imageDetails;
-                })
-            }
-        });
-    };
-
-    $scope.saveCoverImagePosition = function() {
+    $scope.saveCoverImagePosition = function () {
         $http.post('/api/image/cover/', $scope.coverImage)
             .error(function (error) {
                 console.log('Error: ' + error);
@@ -69,13 +61,17 @@ regihoodApp.controller("ProfileController", function ($scope, $http, $upload, $m
     }
 });
 
-regihoodApp.controller("PublicProfileController", function($scope,$http) {
-    $scope.profileInfo = {coverImage: 'img/cover.png', profileImage: 'img/profile.png'};
+regihoodApp.controller("PublicProfileController", function ($scope, $http) {
+    $scope.profileInfo = {coverImage: 'img/cover.jpg', profileImage: 'img/profile.jpg'};
 
-    retrieveImageDetails($http, $scope.user_id, function(profileInfo) {
-        $scope.profileInfo = profileInfo;
-    })
+    $scope.initCurrentUser = function (currentUser) {
+        $scope.currentUser = currentUser;
 
+        retrieveProfileInfo($http, currentUser, function (profileInfo) {
+            $scope.profileInfo = profileInfo
+        });
+
+    }
 
 });
 
@@ -91,8 +87,11 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
 
     // Normal dropdown menu items. If the post is not from the user it must show different actions.
     //$scope.dropdownMenu = {items: [{id: "delete", name: "Löschen", usertype: 'user'}, {id: "hide" , name: "Verstecken", usertype: 'general'}, {id: "edit", name: "Editieren", usertype: 'user'},{id: "unfollow", name: "Abbestellen", usertype: 'general'}]};
-    var dropdownUser = [{id: "delete", name: "Löschen"}, {id: "hide" , name: "Verstecken"}, {id: "edit", name: "Editieren"}];
-    var dropdownGeneral = [{id: "hide" , name: "Verstecken"}, {id: "unfollow", name: "Abbestellen"}];
+    var dropdownUser = [{id: "delete", name: "Löschen"}, {id: "hide", name: "Verstecken"}, {
+        id: "edit",
+        name: "Editieren"
+    }];
+    var dropdownGeneral = [{id: "hide", name: "Verstecken"}, {id: "unfollow", name: "Abbestellen"}];
 
 
     /*
@@ -109,9 +108,9 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         });
 
     /*
-      When landing on the page, get all news and show them.
-      TODO: In future it should only show the first something and all others should be fetched only if necessary -> Pagination
-      */
+     When landing on the page, get all news and show them.
+     TODO: In future it should only show the first something and all others should be fetched only if necessary -> Pagination
+     */
     $http.get('/api/news')
         .success(function (data) {
             $scope.news = data;
@@ -121,13 +120,13 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         });
 
 
-    $scope.getDropDownMenu = function(message) {
+    $scope.getDropDownMenu = function (message) {
         var result = {};
 
-        if($scope.currentUser == message.user)
+        if ($scope.currentUser == message.user)
             result = dropdownUser;
         else
-           result = dropdownGeneral;
+            result = dropdownGeneral;
 
 
         return result;
@@ -137,19 +136,10 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         if (type === 'delete') {
             console.log("deleting message");
             /*
-            Should delete really be delete -> probably not. It should only be removed from the stream.
+             Should delete really be delete -> probably not. It should only be removed from the stream.
              */
             $scope.deleteMessage(message);
-            /*
-            $http.delete('/api/messages/' + message._id)
-                .success(function (data) {
-                    retrievedMessages = data;
-                    console.log(data);
-                })
-                .error(function (data) {
-                    console.log('Error: ' + data);
-                });
-              */
+
         }
         else if (type === 'hide') {
             console.log("hiding message");
@@ -167,7 +157,7 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
             message.editEnabled = true;
             console.log("editing message");
         }
-        else if(type === 'unfollow') {
+        else if (type === 'unfollow') {
             console.log("Unfollowing message");
         }
         else {
@@ -181,7 +171,7 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         console.log("Inside filter messages");
         var messageLength = retrievedMessages.length;
 
-        for (var index = 0 ; lastIndex < messageLength && index < maxInitialMessages; index++) {
+        for (var index = 0; lastIndex < messageLength && index < maxInitialMessages; index++) {
             $scope.messages.push(retrievedMessages[lastIndex++]);
         }
     }
@@ -194,7 +184,6 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
                 $scope.post = {}; // clear the form so our user is ready to enter another
                 retrievedMessages = data;
                 $scope.messages.unshift(data[0]);
-                console.log(data);
             })
             .error(function (data) {
                 console.log('Error: ' + data);
@@ -206,11 +195,11 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         $http.post('/api/messages/' + message._id, message)
             .success(function (data) {
                 retrievedMessages = data;
-                console.log(data);
             })
             .error(function (data) {
                 console.log('Error: ' + data);
             });
+        $scope.editEnabled = false;
     };
 
     // delete a todo after checking it
@@ -221,7 +210,6 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
                 retrievedMessages = data;
                 var index = $scope.messages.indexOf(message);
                 $scope.messages.splice(index, 1);
-                console.log(data);
             })
             .error(function (data) {
                 console.log('Error: ' + data);
@@ -229,15 +217,144 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     };
 
     $scope.getProfileOfUser = function (user) {
-        $scope.$state.go('public', {user_id: user});
+        if(user == $scope.currentUser)
+            $scope.$state.go('profile');
+        else
+            $scope.$state.go('public', {user_id: user});
+    }
+
+    $scope.like = function(message) {
+        console.log(message.likes.indexOf($scope.currentUser));
+        if(message.likes.indexOf($scope.currentUser) < 0 ) {
+            message.likes.push($scope.currentUser);
+            $http.post('/api/messages/' + message._id, message)
+                .success(function (data) {
+                    retrievedMessages = data;
+                })
+                .error(function (data) {
+                    console.log('Error: ' + data);
+                });
+        }
+    }
+
+    $scope.submitComment = function(event, message) {
+        var comment = {};
+        comment.author = $scope.currentUser;
+        comment.date = new Date();
+        comment.content = event.currentTarget.value;
+        message.comments.push(comment);
+        $http.post('/api/messages/' + message._id, message);
+        event.currentTarget.value = "";
+    }
+
+    $scope.getCommentUserThumb = function(comment) {
+        var profileInfo
+        retrieveProfileInfo($http, currentUser, function (profileInfo) {
+            $scope.profileInfo = profileInfo
+        });
     }
 });
 
-regihoodApp.controller("PublicMessageController", function($scope, $http) {
+regihoodApp.controller("PublicMessageController", function ($scope, $http) {
+    $scope.messages = [];
+
+    var retrievedMessages = [];
+    var maxInitialMessages = 6;
+    var lastIndex = 0;
+
+    $scope.initCurrentUser = function () {
+        console.log($scope.user_id);
+
+        retrieveProfileInfo($http, $scope.user_id, function (profileInfo) {
+            $scope.profileInfo = profileInfo
+        });
+
+        $http.get('/api/messages/' + $scope.user_id)
+            .success(function (data) {
+                retrievedMessages = data;
+                $scope.filterMessages();
+            })
+            .error(function (data) {
+                console.log('Error: ' + data);
+            });
+    }
+
+    $scope.filterMessages = function () {
+        console.log("Inside filter messages");
+        var messageLength = retrievedMessages.length;
+
+        for (var index = 0; lastIndex < messageLength && index < maxInitialMessages; index++) {
+            $scope.messages.push(retrievedMessages[lastIndex++]);
+        }
+    }
+
+    $scope.like = function(message) {
+        if(message.likes.indexOf($scope.currentUser) < 0 ) {
+            message.likes.push($scope.currentUser);
+            $http.post('/api/messages/' + message._id, message)
+                .success(function (data) {
+                    retrievedMessages = data;
+                })
+                .error(function (data) {
+                    console.log('Error: ' + data);
+                });
+        }
+    }
 
 });
 
-regihoodApp.controller('CropImageController', function($scope, $modalInstance, imageFile) {
+regihoodApp.controller("PrivateMessageController", function ($scope, $http) {
+    $scope.messages = [];
+
+    var retrievedMessages = [];
+
+    var maxInitialMessages = 6;
+    var lastIndex = 0;
+
+    $scope.initCurrentUser = function (currentUser) {
+        $scope.currentUser = currentUser;
+
+        retrieveProfileInfo($http, currentUser, function (profileInfo) {
+            $scope.profileInfo = profileInfo
+        });
+
+        $http.get('/api/messages/' + currentUser)
+            .success(function (data) {
+                retrievedMessages = data;
+                $scope.filterMessages();
+            })
+            .error(function (data) {
+                console.log('Error: ' + data);
+            });
+
+
+    }
+
+    $scope.filterMessages = function () {
+        console.log("Inside filter messages");
+        var messageLength = retrievedMessages.length;
+
+        for (var index = 0; lastIndex < messageLength && index < maxInitialMessages; index++) {
+            $scope.messages.push(retrievedMessages[lastIndex++]);
+        }
+    }
+
+    $scope.like = function(message) {
+        if(message.likes.indexOf($scope.currentUser) < 0 ) {
+            message.likes.push($scope.currentUser);
+            $http.post('/api/messages/' + message._id, message)
+                .success(function (data) {
+                    retrievedMessages = data;
+                })
+                .error(function (data) {
+                    console.log('Error: ' + data);
+                });
+        }
+    }
+});
+
+
+regihoodApp.controller('CropImageController', function ($scope, $modalInstance, imageFile) {
     $scope.myImage = imageFile;
     $scope.myCroppedImage = '';
 
@@ -261,10 +378,23 @@ regihoodApp.controller('CropImageController', function($scope, $modalInstance, i
 
 });
 
+
+//===========================================================================================================
+//                               General functions which could be used more than once
+//===========================================================================================================
+
+/**
+ * Obtains and returns a File API image file from the compact data URI with a contained base64 encoded image inside.
+ *
+ * @param dataURI The data URI containing the image inside.
+ * @param name The name of the resulting image file
+ * @param type The type of the resulting image file
+ * @returns {File}
+ */
 function getFileFromDataURI(dataURI, name, type) {
     var binary = atob(dataURI.split(',')[1]);
     var array = [];
-    for(var i = 0; i < binary.length; i++) {
+    for (var i = 0; i < binary.length; i++) {
         array.push(binary.charCodeAt(i));
     }
     var blobData = new Blob([new Uint8Array(array)], {type: type});
@@ -279,7 +409,13 @@ function getFileFromDataURI(dataURI, name, type) {
     return croppedFile;
 }
 
-function openImageCrop(imageFile, $modal, $scope) {
+/**
+ *
+ * @param imageFile
+ * @param $modal
+ * @param $scope
+ */
+function cropImageAndUpload($upload, $http, imageFile, $modal, $scope) {
 
     var reader = new FileReader();
     reader.onload = function (evt) {
@@ -295,7 +431,7 @@ function openImageCrop(imageFile, $modal, $scope) {
             });
 
             modalInstance.result.then(function (croppedImage) {
-                $scope.upload(getFileFromDataURI(croppedImage, imageFile.name, imageFile.type), 'profile');
+                upload($scope, $http, $upload, getFileFromDataURI(croppedImage, imageFile.name, imageFile.type), 'profile');
                 console.log("Crop");
             }, function () {
                 console.log('Modal dismissed at: ' + new Date());
@@ -305,29 +441,12 @@ function openImageCrop(imageFile, $modal, $scope) {
     reader.readAsDataURL(imageFile);
 };
 
-function retrieveImageDetails($http, type, callback) {
-
-    var url = '/api/image/' + type;
-    var imageDetails = {};
-
-    $http.get(url)
-        .success(function (data) {
-            if (data != '') {
-                if(data.imageId === 'img/cover-empty.jpg' || data.imageId === 'img/profile-empty.png')
-                    imageDetails.path = data.imageId;
-                else
-                    imageDetails.path = 'api/image/' + type + '/' + data.imageId;
-                imageDetails.id = data.imageId;
-                imageDetails.topPosition = data.imagePosition;
-
-                callback(imageDetails);
-            }
-        })
-        .error(function (data) {
-            console.log("Couldn't obtain cover image");
-        });
-};
-
+/**
+ *
+ * @param $http
+ * @param user
+ * @param callback
+ */
 function retrieveProfileInfo($http, user, callback) {
 
     var url = '/api/v1/profile/' + user;
@@ -345,6 +464,27 @@ function retrieveProfileInfo($http, user, callback) {
         });
 };
 
-function unfollowAccount() {
-
+/**
+ *
+ * @param imageFile
+ * @param imageType
+ */
+function upload($scope, $http, $upload, imageFile, imageType) {
+    var file = imageFile;
+    $upload.upload({
+        url: 'upload',
+        fields: {'imageType': imageType},
+        file: file
+    }).progress(function (evt) {
+        var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+        console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
+    }).success(function (data, status, headers, config) {
+        console.log('file ' + config.file.name + 'uploaded.');
+        /*
+         TODO: Chould be made more efficient probably
+         */
+        retrieveProfileInfo($http, currentUser, function (profileInfo) {
+            $scope.profileInfo = profileInfo
+        });
+    });
 };

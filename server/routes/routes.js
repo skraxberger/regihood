@@ -27,6 +27,12 @@ var mongoDriver = mongoose.mongo;
 // Create a gridfs-stream
 var gfs = new Gridfs(db, mongoDriver);
 
+/**
+ * Routing module which is exported an can be used by the express middleware.
+ * The app parama is the express middleware which is used to obtain and control the routing.
+ *
+ * @param app
+ */
 module.exports = function (app) {
 
     app.get('/', function (req, res) {
@@ -34,13 +40,8 @@ module.exports = function (app) {
     });
 
     app.get('/partial/:name', function (req, res) {
-        if (req.isAuthenticated()) {
-            var name = req.params.name;
-            res.render('partials/' + name, {user: req.user});
-        }
-        else {
-            res.redirect('/');
-        }
+        var name = req.params.name;
+        res.render('partials/' + name, {user: req.user});
     });
 
     app.post('/register', function (req, res) {
@@ -78,44 +79,8 @@ module.exports = function (app) {
 
         var file = req.files.file;
         if (req.body.imageType == 'cover') {
-
-            var image = gm(file.path);
-
-            var width = 0;
-            var height = 0;
-
-            image.size(function (err, size) {
-                    if (!err) {
-                        width = size.width;
-                        height = size.height;
-                    }
-            });
-
-            var scaledImage = image.resize(1170 / width).write(file.path, function (err) {
-                logger.error({error: err, file: file}, "Couldn't resize image");
-            });
-
-
+            resizeImage(file);
             storeInGridFS(file, req.body, req.session.passport.user, res);
-            /*
-            lwip.open(file.path, function (err, image) {
-                // check 'err'. use 'image'.
-                if (err)
-                    logger.error({error: err, file: req.files.file}, "Couldn't open image for resizing");
-                else {
-                    var scaleWidth = 1170 / image.width();
-                    image.scale(scaleWidth, function (err, scaledImage) {
-                        scaledImage.writeFile(file.path, function (err) {
-                            if (err)
-                                logger.error({error: err, file: file.path}, "Couldn't save scaled image");
-                            else
-                                storeInGridFS(file, req.body, req.session.passport.user, res);
-                        });
-                    });
-                }
-
-            });
-            */
         }
         else {
             storeInGridFS(file, req.body, req.session.passport.user, res);
@@ -139,7 +104,7 @@ module.exports = function (app) {
                     logger.error(err);
                     res.send(200, 'Cover image position not updated');
                 } else {
-                    logger.info({user: req.session.passport.user}, {yPosition: cover.topPosition}, "Cover image position updated");
+                    logger.info({user: user}, {yPosition: cover.topPosition}, "Cover image position updated");
                     res.send(200, 'Cover image position updated');
                 }
             });
@@ -170,7 +135,7 @@ module.exports = function (app) {
     app.get('/api/v1/profile/:username', function (request, response) {
         // Now we automatically get the story and element in the request object
         //{ story: request.story, element: request.element}
-        getProfileInfo(request.session.passport, request.username, response);
+        getProfileInfo(request.username, response);
     });
 
     app.get('/api/v1/image/:imageId', function (request, response) {
@@ -179,37 +144,32 @@ module.exports = function (app) {
 
     });
 
+    /*
+     app.get('/api/image/cover', loggedIn, function (req, res) {
+     getImageDetailsFromAccount(req.session.passport.user, res);
+     });
 
-    app.get('/api/image/cover', function (req, res) {
-        getImageDetailsFromAccount('cover', req.session.passport, res);
-    });
+     app.get('/api/image/cover/:filename', loggedIn, function (req, res) {
+     returnImageFromStore('cover', req.params.filename, res);
+     });
 
-    app.get('/api/image/cover/:filename', function (req, res) {
-        returnImageFromStore('cover', req.params.filename, res);
-    });
+     app.get('/api/image/profile', loggedIn, function (req, res) {
+     getImageDetailsFromAccount(req.session.passport.user, res);
+     });
 
-    app.get('/api/image/profile', function (req, res) {
-        getImageDetailsFromAccount('profile', req.session.passport, res);
-    });
-
-    app.get('/api/image/profile/:filename', function (req, res) {
-        returnImageFromStore('profíle', req.params.filename, res);
-    });
-
+     app.get('/api/image/profile/:filename', loggedIn, function (req, res) {
+     returnImageFromStore('profíle', req.params.filename, res);
+     });
+     */
     app.get('/api/messages', function (req, res) {
 
-        // use mongoose to get all todos in the database
         /*
-         Message.find(function (err, messages) {
+         Use mongoose to get all message in the database. Only the once are displayed which are not deleted, duuh and
+         the user has not selected to be hidden. Then the messages are sorted in date descending order.
 
-         // if there is an error retrieving, send the error. nothing after res.send(err) will execute
-         if (err)
-         res.send(err)
-
-         res.json(messages); // return all messages in JSON format
-         });
+         TODO: Try to use a more configurable search function or to provide one from a configuration
          */
-        Message.find({hidden: { "$nin" : [req.user.username]}}).where('deleted').equals('false').sort('-date').exec(function (err, messages) {
+        Message.find({hidden: {"$nin": [req.user.username]}}).where('deleted').equals('false').sort('-date').exec(function (err, messages) {
             if (err)
                 res.send(err)
 
@@ -219,7 +179,7 @@ module.exports = function (app) {
 
     app.get('/api/news', function (req, res) {
 
-        // use mongoose to get all todos in the database
+        // use mongoose to get all news in the database
         NewsItem.find(function (err, news) {
 
             // if there is an error retrieving, send the error. nothing after res.send(err) will execute
@@ -254,23 +214,22 @@ module.exports = function (app) {
 
     // update a message
     app.post('/api/messages/:message_id', function (req, res) {
+
         var query = {_id: req.params.message_id};
-        Message.findOneAndUpdate(query, {text: req.body.text, hidden: req.body.hidden}, function (err, message) {
+
+        /*
+         TODO: We need to find a way to update the whole message except the id, although the id may not change since it
+         is not editable.
+         */
+
+        Message.findOne(query, function (err, message) {
             if (err)
-                res.send(err);
-
-
-            res.json(message);
-
-            // get and return all the messages after you create another
-            /*
-             Message.find({}).where('deleted').equals('false').sort('-date').exec(function (err, messages) {
-             if (err)
-             res.send(err)
-
-             res.json(messages); // return all messages in JSON format
-             });
-             */
+                logger.error({error: err}, {message: message._id}, "Couldn't update message in database");
+            else {
+                message = makeDeepCopy(message, req.body);
+                message.save();
+                logger.info({message: message._id}, "Updated message in database.");
+            }
         });
     });
 
@@ -292,13 +251,37 @@ module.exports = function (app) {
         });
     });
 
+    app.get('/api/messages/:username', function (req, res) {
+        // get and return all the messages after you create another
+        Message.find({}).where('deleted').equals('false').where('user').equals(req.username).sort('-date').exec(function (err, messages) {
+            if (err)
+                res.send(err)
+
+            res.json(messages); // return all messages in JSON format
+        });
+
+    });
+
     app.get('*', function (req, res) {
         res.render('index', {user: req.user});
     });
 
 };
 
-var storeInGridFS = function (file, metadata, user, res) {
+//===========================================================================================================
+//                               General functions which could be used more than once
+//===========================================================================================================
+
+/**
+ * Store the provided file and its metadate in the MongoDB GridFS. It is mostly used for images but it can
+ * store and file which is provided. This is the best way to store big amounts of data.
+ *
+ * @param file
+ * @param metadata
+ * @param user
+ * @param res
+ */
+function storeInGridFS(file, metadata, user, res) {
 
     var writestream = gfs.createWriteStream({
         filename: file.name,
@@ -339,59 +322,52 @@ var storeInGridFS = function (file, metadata, user, res) {
 
 }
 
-function getImageDetailsFromAccount(type, passport, res) {
+/**
+ * The function obtains the image details stored in the account object of each user. The image details are retrieved
+ * the provided user name.
+ *
+ * @param user The username of the account which should used to retrieve the image details
+ * @param res The response object
+ */
+/*
+ function getImageDetailsFromAccount(user, res) {
 
-    var imageDetails = {};
+ var imageDetails = {};
 
-    if (passport) {
-        Account.findOne({username: passport.user}, function (err, profile) {
-            if (err)
-                logger.error({error: err}, "Couldn't obtain account from database");
-            if (profile) {
-                logger.info({profile: profile}, {user: passport.user}, "Found and returning profile info");
+ if (user) {
+ Account.findOne({username: user}, function (err, profile) {
+ if (err)
+ logger.error({error: err}, "Couldn't obtain account from database");
+ if (profile) {
+ logger.info({profile: profile}, {user: user}, "Found and returning profile info");
 
-                imageDetails.imagePosition = profile.coverImagePosition;
-                if (type == 'profile')
-                    imageDetails.imageId = profile.profileImage;
-                else
-                    imageDetails.imageId = profile.coverImage;
-            }
+ imageDetails.imagePosition = profile.coverImagePosition;
 
-            //callback(imageDetails);
+ if (type == 'profile')
+ imageDetails.imageId = profile.profileImage;
+ else
+ imageDetails.imageId = profile.coverImage;
+ }
 
+ res.send(JSON.stringify(imageDetails));
+ });
+ }
+ else {
+ imageDetails.imageId = 'empty';
 
-            res.send(JSON.stringify(imageDetails));
-        });
-    }
-    else {
-        /*
-         TODO: Need to send an empty profile image back to client otherwise the profile image would be a mess.
-         */
-        imageDetails.imageId = 'empty';
+ logger.info(JSON.stringify(imageDetails));
 
-        logger.info(JSON.stringify(imageDetails));
+ }
+ };
+ */
 
-        //callback(imageDetails);
-
-        //res.send(JSON.stringify(imageDetails));
-
-    }
-};
-
-function getProfileInfo(passport, username, response) {
+function getProfileInfo(username, response) {
 
     var profileInfo = {};
 
     var query = {'username': username};
-    var privateProfile = false;
 
-    if (passport) {
-        privateProfile = false;
-        query = {'username': passport.user};
-    }
-
-
-    Account.findOne({username: passport.user}, function (error, profile) {
+    Account.findOne(query, function (error, profile) {
         if (error)
             logger.error({error: error}, "Couldn't obtain account from database");
         if (profile) {
@@ -449,12 +425,46 @@ function getImageFromStore(imageId, response) {
         readStream.pipe(response);
 };
 
+function resizeImage(file) {
+
+    var image = gm(file.path);
+
+    var width = 0;
+    var height = 0;
+
+    image.size(function (err, size) {
+        if (!err) {
+            width = size.width;
+            height = size.height;
+        }
+    });
+
+    var scaledImage = image.resize(1170 / width).write(file.path, function (err) {
+        if (err)
+            logger.error({error: err, file: file}, "Couldn't resize image");
+    });
+
+}
+
 function loggedIn(req, res, next) {
-    if (req.user) {
+    if (req.user && req.isAuthenticated()) {
         next();
     } else {
         res.redirect(301, '/login');
     }
 }
 
+function makeDeepCopy(model, upsertData) {
+    model.user = upsertData.user;
+    model.text = upsertData.text;
+    model.editEnabled = upsertData.editEnabled;
+    model.likes = upsertData.likes;
+    model.hidden = upsertData.hidden
+    model.comments = upsertData.comments;
+    model.containerName = upsertData.containerName;
+    model.hash_tags = upsertData.hash_tags;
+    model.deleted = upsertData.deleted;
+    model.date = upsertData.date;
 
+    return model;
+};
