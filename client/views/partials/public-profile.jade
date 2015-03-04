@@ -1,10 +1,10 @@
 div(ng-controller="PublicProfileController as profileCtrl", ng-init="initCurrentUser()")
     .row
         pre#uiRouterInfo
-            | {{currentUser}}
             | $state = {{$state.current.name}}
             | $stateParams = {{$stateParams}}
             | $state full url = {{ $state.$current.url.source }}
+            | Current User = {{currentUser}}
     .row
         .profile-cover-container
             .profile-cover-wrapper

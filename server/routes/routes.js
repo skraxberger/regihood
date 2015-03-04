@@ -263,6 +263,7 @@ module.exports = function (app) {
     });
 
     app.get('*', function (req, res) {
+        logger.info({originalUrl: req.originalUrl}, "General router sending index");
         res.render('index', {user: req.user});
     });
 

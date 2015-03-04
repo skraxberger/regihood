@@ -66,8 +66,13 @@ passport.deserializeUser(Account.deserializeUser());
 mongoose.connect('mongodb://localhost:27017/passport_local_mongoose');
 
 require('./server/routes/routes')(app);
-//===============PORT=================
-http.createServer(app).listen(app.get('port'), function(){
-    console.log("Express server listening on port " + app.get('port'));
-});
 
+//===============PORT=================
+var server = http.createServer(app);
+var io = require('socket.io').listen(server);
+io.sockets.on('connection', require('./server/routes/socket'));
+
+
+server.listen(app.get('port'), function () {
+    console.log('Express server with socket.io listening on port ' + app.get('port'));
+});

@@ -1,7 +1,11 @@
 /**
  * Created by skraxberger on 28.01.2015.
  */
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    bunyan = require('bunyan');
+
+var logger = bunyan.createLogger({name: 'database'});
+
 
 var Schema = mongoose.Schema;
 
@@ -17,5 +21,9 @@ var Message = new Schema({
     deleted : {type: Boolean, default: false},
     date : { type: Date, default: Date.now } /* Message creation date */
 });
+
+Message.post('save', function (doc) {
+    logger.info({documentId: doc._id}, 'Document has been saved');
+})
 
 module.exports = mongoose.model('Message', Message);

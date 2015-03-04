@@ -3,6 +3,10 @@ body {
     padding-top: 50px;
 }
 
+.color-grey {
+    color: grey;
+}
+
 .caret-right {
     margin-right: 5px;
 }

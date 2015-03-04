@@ -1,6 +1,10 @@
 div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user.username}'")
     .row
-        p {{currentUser}}
+        pre#uiRouterInfo
+            | $state = {{$state.current.name}}
+            | $stateParams = {{$stateParams}}
+            | $state full url = {{ $state.$current.url.source }}
+            | Current User = {{currentUser}}
     .row
         .col-xs-6.col-sm-2
             .card.special
@@ -54,13 +58,16 @@ div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user
                         span ·
                         a(href="", ng-click="share(message)")  Teilen
                     .card-comments
-                        div(ng-repeat="comment in message.comments")
+                        div(ng-repeat="comment in filterComments(message)")
                             .comments
                                 .media
                                     a.pull-left
-                                        img.media-object(data-src="getCommentUserThumb(comment)" alt="avatar")
-                                .media-body
-                                    h4.media-heading {{comment.author}}
-                                    p {{comment.content}}
+                                        img.media-object(data-src="getCommentUserThumb(comment)")
+                                    .media-body
+                                        .clearfix
+                                            .pull-right
+                                                i.fa.fa-times.color-grey(tooltip="Verstecken", ng-click="hideComment(message, comment)")
+                                        h4.media-heading {{comment.author}}
+                                        p {{comment.content}}
                         input.form-control(ng-model="commentContent", ui-keypress="{13:'submitComment($event, message)'}")
         .col-xs-6.col-sm-2

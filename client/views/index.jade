@@ -21,8 +21,9 @@ html
             include includes/navbar_logged_out
             include includes/logged_out
         else
-            include includes/navbar_logged_in
-            include includes/logged_in
+            div(data-ng-app="regihoodApp")
+                include includes/navbar_logged_in
+                include includes/logged_in
 
         script(src='components/jquery/dist/jquery.min.js')
         script(src='components/angular/angular.min.js')

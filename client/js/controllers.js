@@ -80,6 +80,9 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     $scope.messages = [];
     $scope.news = [];
 
+    var commentsChanged = false;
+    var messagesChanged = false;
+
     var retrievedMessages = [];
 
     var maxInitialMessages = 6;
@@ -179,19 +182,28 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     // when submitting the add form, send the text to the node API
     $scope.createMessage = function () {
         $scope.post.user = $scope.user_id;
+        /*
+         TODO: We need to remove all the AJAX calls from the functions if possible because they slow down the user
+         interaction and client rendering
+         */
         $http.post('/api/messages', $scope.post)
             .success(function (data) {
-                $scope.post = {}; // clear the form so our user is ready to enter another
                 retrievedMessages = data;
                 $scope.messages.unshift(data[0]);
             })
             .error(function (data) {
                 console.log('Error: ' + data);
             });
+        $scope.post = {}; // clear the form so our user is ready to enter another
     };
 
     // update message
     $scope.updateMessage = function (message) {
+
+        pushMessageToServer($http, message, function(data) {
+            retrievedMessages = data;
+        });
+        /*
         $http.post('/api/messages/' + message._id, message)
             .success(function (data) {
                 retrievedMessages = data;
@@ -199,6 +211,7 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
             .error(function (data) {
                 console.log('Error: ' + data);
             });
+        */
         $scope.editEnabled = false;
     };
 
@@ -217,16 +230,22 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     };
 
     $scope.getProfileOfUser = function (user) {
-        if(user == $scope.currentUser)
+        if (user == $scope.currentUser)
             $scope.$state.go('profile');
         else
             $scope.$state.go('public', {user_id: user});
     }
 
-    $scope.like = function(message) {
+
+    $scope.like = function (message) {
         console.log(message.likes.indexOf($scope.currentUser));
-        if(message.likes.indexOf($scope.currentUser) < 0 ) {
+        if (message.likes.indexOf($scope.currentUser) < 0) {
             message.likes.push($scope.currentUser);
+
+            pushMessageToServer($http, message, function(data) {
+                retrievedMessages = data;
+            });
+            /*
             $http.post('/api/messages/' + message._id, message)
                 .success(function (data) {
                     retrievedMessages = data;
@@ -234,24 +253,65 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
                 .error(function (data) {
                     console.log('Error: ' + data);
                 });
+            */
         }
     }
 
-    $scope.submitComment = function(event, message) {
+    $scope.submitComment = function (event, message) {
         var comment = {};
         comment.author = $scope.currentUser;
         comment.date = new Date();
         comment.content = event.currentTarget.value;
+        comment.hide = [];
         message.comments.push(comment);
         $http.post('/api/messages/' + message._id, message);
         event.currentTarget.value = "";
     }
 
-    $scope.getCommentUserThumb = function(comment) {
-        var profileInfo
-        retrieveProfileInfo($http, currentUser, function (profileInfo) {
-            $scope.profileInfo = profileInfo
-        });
+    $scope.filterComments = function (message) {
+        var comments = message.comments;
+        var usedComments = [];
+        for (var index = 0; index < comments.length; index++) {
+            if (typeof comments[index].hide == 'undefined' || comments[index].hide.indexOf($scope.currentUser) < 0) {
+                usedComments.push(comments[index]);
+            }
+        }
+        return usedComments;
+    }
+
+    $scope.hideComment = function (message, comment) {
+        if(message.comments.length) {
+            var index = message.comments.indexOf(comment);
+            if (typeof message.comments[index].hide == 'undefined') {
+                message.comments[index].hide = [];
+                message.comments[index].hide.push($scope.currentUser);
+
+                pushMessageToServer($http, message, function (data) {
+                    retrievedMessages = data;
+                    $scope.filterComments(message);
+                });
+
+            }
+            else if(message.comments[index].hide.indexOf($scope.currentUser) < 0) {
+                message.comments[index].hide.push($scope.currentUser);
+
+                pushMessageToServer($http, message, function (data) {
+                    retrievedMessages = data;
+                    $scope.filterComments(message);
+                });
+            }
+        }
+    }
+
+    $scope.getCommentUserThumb = function (comment) {
+        /*
+         retrieveProfileInfo($http, currentUser, function (profileInfo) {
+
+         });
+         */
+        console.log("Comment User Thumb");
+
+        return "holder.js/28x28";
     }
 });
 
@@ -288,8 +348,8 @@ regihoodApp.controller("PublicMessageController", function ($scope, $http) {
         }
     }
 
-    $scope.like = function(message) {
-        if(message.likes.indexOf($scope.currentUser) < 0 ) {
+    $scope.like = function (message) {
+        if (message.likes.indexOf($scope.currentUser) < 0) {
             message.likes.push($scope.currentUser);
             $http.post('/api/messages/' + message._id, message)
                 .success(function (data) {
@@ -339,8 +399,8 @@ regihoodApp.controller("PrivateMessageController", function ($scope, $http) {
         }
     }
 
-    $scope.like = function(message) {
-        if(message.likes.indexOf($scope.currentUser) < 0 ) {
+    $scope.like = function (message) {
+        if (message.likes.indexOf($scope.currentUser) < 0) {
             message.likes.push($scope.currentUser);
             $http.post('/api/messages/' + message._id, message)
                 .success(function (data) {
@@ -488,3 +548,16 @@ function upload($scope, $http, $upload, imageFile, imageType) {
         });
     });
 };
+
+function pushMessageToServer($http, message, callback) {
+    $http.post('/api/messages/' + message._id, message)
+        .success(function (data) {
+            if(typeof callback != 'undefined')
+                callback(data);
+            else
+                console.log("Success but no callback defined.");
+        })
+        .error(function (data) {
+            console.log('Error: ' + data);
+        });
+}
