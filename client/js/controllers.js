@@ -273,10 +273,24 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         var usedComments = [];
         for (var index = 0; index < comments.length; index++) {
             if (typeof comments[index].hide == 'undefined' || comments[index].hide.indexOf($scope.currentUser) < 0) {
+                comments[index].dropDown = '';
+                comments[index].dropdownMenu = [{id: "edit", name: "Edit"}, {id: "delete", name: "Delete"}];
+                if(comments[index].author == $scope.currentUser) {
+                    comments[index].commentClass = "{'fa' : true,  'fa-pencil-square-o': true, 'color-grey' : true}";
+                    comments[index].tooltipAction = "Edit or Delete";
+                }
+                else {
+                    comments[index].commentClass = "{'fa' : true,  'fa-times': true, 'color-grey' : true}";
+                    comments[index].tooltipAction = "Hide";
+                }
                 usedComments.push(comments[index]);
             }
         }
         return usedComments;
+    }
+
+    $scope.getCommentActionDropdownMenu = function(comment) {
+
     }
 
     $scope.hideComment = function (message, comment) {
