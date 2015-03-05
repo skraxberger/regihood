@@ -64,8 +64,8 @@ div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user
                                     a.pull-left
                                         img.media-object(data-src="getCommentUserThumb(comment)")
                                     .media-body(ng-mouseenter="comment.showTooltip = true", ng-mouseleave="comment.showTooltip = false")
-                                        .pull-right(ng-class={{comment.dropDown}})
-                                            i(ng-show="comment.showTooltip", ng-class="{{comment.commentClass}}", tooltip="{{comment.tooltipAction}}", ng-click="applyActionComment(message, comment)")
+                                        .pull-right(ng-class="{{comment.dropDown}}", attachable)
+                                            i(ng-show="comment.showTooltip", ng-class="{{comment.commentClass}}", tooltip="{{comment.tooltipAction}}", ng-click="applyActionComment(comment)", id='attachee')
                                             ul.dropdown-menu(role="menu")
                                                 li(ng-repeat="item in comment.dropdownMenu")
                                                     a(href="", ng-click="optionDropdownActionMenuClick(item.id,comment, $index)") {{item.name}}

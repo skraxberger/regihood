@@ -293,6 +293,11 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
 
     }
 
+    $scope.applyActionComment = function(comment) {
+        comment.dropDown = "dropdown";
+        comment.commentClass.push({'dropdown-toggle' : true});
+    }
+
     $scope.hideComment = function (message, comment) {
         if(message.comments.length) {
             var index = message.comments.indexOf(comment);
