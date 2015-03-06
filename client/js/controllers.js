@@ -236,7 +236,6 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
             $scope.$state.go('public', {user_id: user});
     }
 
-
     $scope.like = function (message) {
         console.log(message.likes.indexOf($scope.currentUser));
         if (message.likes.indexOf($scope.currentUser) < 0) {
@@ -274,13 +273,14 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         for (var index = 0; index < comments.length; index++) {
             if (typeof comments[index].hide == 'undefined' || comments[index].hide.indexOf($scope.currentUser) < 0) {
                 comments[index].dropDown = '';
-                comments[index].dropdownMenu = [{id: "edit", name: "Edit"}, {id: "delete", name: "Delete"}];
+                comments[index].dropdownMenu = [];
                 if(comments[index].author == $scope.currentUser) {
-                    comments[index].commentClass = "{'fa' : true,  'fa-pencil-square-o': true, 'color-grey' : true}";
+                    comments[index].commentClass = ["fa ", "fa-pencil-square-o ", "color-grey "];
                     comments[index].tooltipAction = "Edit or Delete";
+                    comments[index].dropdownMenu = ["edit", "delete"];
                 }
                 else {
-                    comments[index].commentClass = "{'fa' : true,  'fa-times': true, 'color-grey' : true}";
+                    comments[index].commentClass = ["fa ", "fa-times ", "color-grey "];
                     comments[index].tooltipAction = "Hide";
                 }
                 usedComments.push(comments[index]);
@@ -289,13 +289,16 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         return usedComments;
     }
 
-    $scope.getCommentActionDropdownMenu = function(comment) {
-
-    }
-
     $scope.applyActionComment = function(comment) {
         comment.dropDown = "dropdown";
-        comment.commentClass.push({'dropdown-toggle' : true});
+        //comment.commentClass.push("dropdown-toggle");
+
+        var selectedElement = angular.element(document.querySelector("#attachee"))
+
+        var classArray = selectedElement.attr('ng-class');
+        classArray.push("dropdown-toggle");
+        selectedElement.attr("ngClass", comment.CommentClass);
+        selectedElement.attr("dropdown-toggle", "");
     }
 
     $scope.hideComment = function (message, comment) {

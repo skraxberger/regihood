@@ -49,14 +49,15 @@ regihoodApp.directive('dragImage', ['$document', function ($document) {
     };
 }]);
 
+/*
 regihoodApp.directive('attachable', function($compile, $document) {
    return {
        restrict: 'A',
        replace: false,
        terminal: true, //this setting is important, see explanation below
        priority: 1000, //this setting is important, see explanation below
-       compile: function compile(element, attrs) {
-           element.attr("dropdown", "");
+       compile: function (element, attrs) {
+           element.attr("dropdown-toggle", "");
            element.attr("on-toggle","toggle(open)");
            element.removeAttr("attachable"); //remove the attribute to avoid indefinite loop
 
@@ -66,4 +67,4 @@ regihoodApp.directive('attachable', function($compile, $document) {
            $compile(attacheeElement.contents())(scope);
        }
    } ;
-});
+}); */
