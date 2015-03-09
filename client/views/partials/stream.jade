@@ -31,13 +31,12 @@ div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user
         .col-xs-6.col-sm-2
         .col-xs-6.col-sm-7
             div(infinite-scroll="filterMessages()", infinite-scroll-distance="0")
-                .card.special(ng-repeat="message in messages")
-                    .clearfix
-                        .pull-right.dropdown(dropdown on-toggle="toggle(open)")
-                            i.fa.fa-angle-down.caret-right.dropdown-toggle(dropdown-toggle)
-                            ul.dropdown-menu(role="menu")
-                                li(ng-repeat="item in getDropDownMenu(message)")
-                                        a(href="", ng-click="optionMenuClick(item.id,message, $index)") {{item.name}}
+                .card(ng-repeat="message in messages")
+                    .pull-right.dropdown(dropdown on-toggle="toggle(open)")
+                        i.fa.fa-angle-down.caret-right.dropdown-toggle(dropdown-toggle)
+                        ul.dropdown-menu(role="menu")
+                            li(ng-repeat="item in getDropDownMenu(message)")
+                                    a(href="", ng-click="optionMenuClick(item.id,message, $index)") {{item.name}}
                     .card-heading.image
                         img(ng-src="img/profile-32.png", alt="")
                         .card-heading-header
@@ -58,18 +57,26 @@ div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user
                         span ·
                         a(href="", ng-click="share(message)")  Teilen
                     .card-comments
-                        div(ng-repeat="comment in filterComments(message)")
-                            .comments
-                                .media
-                                    a.pull-left
-                                        img.media-object(data-src="getCommentUserThumb(comment)")
-                                    .media-body(ng-mouseenter="comment.showTooltip = true", ng-mouseleave="comment.showTooltip = false")
-                                        .pull-right(ng-class="{{comment.dropDown}}")
-                                            i(ng-show="comment.showTooltip", ng-class="{{comment.commentClass}}", tooltip="{{comment.tooltipAction}}", ng-click="applyActionComment(comment)", id="attachee")
-                                            ul.dropdown-menu(role="menu")
-                                                li(ng-repeat="item in comment.dropdownMenu")
-                                                    a(href="", ng-click="optionDropdownActionMenuClick(item,comment)") {{item}}
-                                        h4.media-heading {{comment.author}}
-                                        p {{comment.content}}
+                        div(ng-repeat="comment in filterComments(message)", ng-mouseenter="comment.showTooltip = true", ng-mouseleave="comment.showTooltip = false")
+                                a.pull-left
+                                    img.media-object(data-src="getCommentUserThumb(comment)")
+                                .media-body
+                                    .pull-right(ng-show="!comment.dropdown")
+                                        i.fa.fa-times.color-grey(ng-show="comment.showTooltip", tooltip="{{comment.tooltipAction}}", ng-click="commentHide(message, comment)")
+                                    .pull-right.dropdown(dropdown on-toggle="toggle(open)", ng-show="comment.dropdown")
+                                        i.fa.fa-pencil-square-o.color-grey.dropdown-toggle(ng-show="comment.showTooltip",tooltip="{{comment.tooltipAction}}", dropdown-toggle)
+                                        ul.dropdown-menu(role="menu")
+                                            li
+                                                a(href="", ng-click="commentMakeEditable(message, comment)") {{label.comment.edit}}
+                                            li
+                                                a(href="", ng-click="commentDelete(message, comment)") {{label.comment.delete}}
+                                    h4.media-heading {{comment.author}}
+                                    div(ng-hide="comment.editEnabled")
+                                        {{comment.content}}
+                                    div(ng-show="comment.editEnabled")
+                                        textarea.form-control.simplebox(ng-model="comment.content", style="background-color: #E5E5E5;")
+                                        .clearfix
+                                        button.btn.btn-primary.pull-right(type="submit", ng-click="commentEdit(message, comment)") {{label.comment.update}}
+
                         input.form-control(ng-model="commentContent", ui-keypress="{13:'submitComment($event, message)'}")
         .col-xs-6.col-sm-2

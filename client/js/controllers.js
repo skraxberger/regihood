@@ -80,6 +80,9 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
     $scope.messages = [];
     $scope.news = [];
 
+    $scope.label = {};
+    $scope.label.comment = {edit: "Editieren", delete: "Löschen", update: "Ändern"};
+
     var commentsChanged = false;
     var messagesChanged = false;
 
@@ -212,7 +215,7 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
                 console.log('Error: ' + data);
             });
         */
-        $scope.editEnabled = false;
+        message.editEnabled = false;
     };
 
     // delete a todo after checking it
@@ -272,15 +275,12 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         var usedComments = [];
         for (var index = 0; index < comments.length; index++) {
             if (typeof comments[index].hide == 'undefined' || comments[index].hide.indexOf($scope.currentUser) < 0) {
-                comments[index].dropDown = '';
-                comments[index].dropdownMenu = [];
+                comments[index].dropdown = false;
                 if(comments[index].author == $scope.currentUser) {
-                    comments[index].commentClass = ["fa ", "fa-pencil-square-o ", "color-grey "];
+                    comments[index].dropdown = true;
                     comments[index].tooltipAction = "Edit or Delete";
-                    comments[index].dropdownMenu = ["edit", "delete"];
                 }
                 else {
-                    comments[index].commentClass = ["fa ", "fa-times ", "color-grey "];
                     comments[index].tooltipAction = "Hide";
                 }
                 usedComments.push(comments[index]);
@@ -289,38 +289,40 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         return usedComments;
     }
 
-    $scope.applyActionComment = function(comment) {
-        comment.dropDown = "dropdown";
-        //comment.commentClass.push("dropdown-toggle");
-
-        var selectedElement = angular.element(document.querySelector("#attachee"))
-
-        var classArray = selectedElement.attr('ng-class');
-        classArray.push("dropdown-toggle");
-        selectedElement.attr("ngClass", comment.CommentClass);
-        selectedElement.attr("dropdown-toggle", "");
+    $scope.commentDelete = function(message, comment) {
+        $scope.makeCommentUnavailable(message, comment);
     }
 
-    $scope.hideComment = function (message, comment) {
+    $scope.commentHide = function (message, comment) {
+        $scope.makeCommentUnavailable(message, comment);
+    }
+
+    $scope.commentMakeEditable = function(message, comment) {
         if(message.comments.length) {
             var index = message.comments.indexOf(comment);
-            if (typeof message.comments[index].hide == 'undefined') {
-                message.comments[index].hide = [];
-                message.comments[index].hide.push($scope.currentUser);
-
-                pushMessageToServer($http, message, function (data) {
-                    retrievedMessages = data;
-                    $scope.filterComments(message);
-                });
-
+            if(index > 0) {
+                message.comments[index].editEnabled = true;
             }
-            else if(message.comments[index].hide.indexOf($scope.currentUser) < 0) {
-                message.comments[index].hide.push($scope.currentUser);
+            else {
+                console.log("Couldn't find comment in message");
+            }
+        }
+    }
+
+    $scope.commentEdit = function(message, comment) {
+        if(message.comments.length) {
+            var index = message.comments.indexOf(comment);
+            if(index > 0) {
 
                 pushMessageToServer($http, message, function (data) {
                     retrievedMessages = data;
                     $scope.filterComments(message);
                 });
+
+                message.comments[index].editEnabled = false;
+            }
+            else {
+                console.log("Couldn't find comment in message");
             }
         }
     }
@@ -334,6 +336,36 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         console.log("Comment User Thumb");
 
         return "holder.js/28x28";
+    }
+
+    $scope.makeCommentUnavailable = function(message, comment) {
+        if(message.comments.length) {
+            var index = message.comments.indexOf(comment);
+            if(index > 0) {
+                if (typeof message.comments[index].hide == 'undefined') {
+                    message.comments[index].hide = [];
+                    message.comments[index].hide.push($scope.currentUser);
+
+                    pushMessageToServer($http, message, function (data) {
+                        retrievedMessages = data;
+                        $scope.filterComments(message);
+                    });
+
+                }
+                else if (message.comments[index].hide.indexOf($scope.currentUser) < 0) {
+                    message.comments[index].hide.push($scope.currentUser);
+
+                    pushMessageToServer($http, message, function (data) {
+                        retrievedMessages = data;
+                        $scope.filterComments(message);
+                    });
+                }
+            }
+            else {
+                console.log("Couldn't find comment in message");
+            }
+        }
+
     }
 });
 
