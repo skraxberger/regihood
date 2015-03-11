@@ -26,15 +26,15 @@
                 .form-group(style="margin-top:10px")
                     .col-sm-12.controls
                         div(style="border-top: 1px solid#888; padding-top:15px; font-size:85%")
-                            button.btn.btn-sm.btn-social.btn-facebook(id="btn-fblogin", type="button")
+                            a.btn.btn-sm.btn-social.btn-facebook(id="btn-fblogin", href="/auth/facebook", type="button")
                                 i.fa.fa-facebook
                                 | Login with Facebook
-                            span.spaceLeft
-                            button.btn.btn-sm.btn-social.btn-google-plus(id="btn-googlelogin", type="button")
+                            span.pad-sm
+                            a.btn.btn-sm.btn-social.btn-google-plus(id="btn-googlelogin", href="/auth/google", type="button")
                                 i.fa.fa-google
                                 | Login with Google
-                            span.spaceLeft
-                            button.btn.btn-sm.btn-social.btn-twitter(id="btn-twitterlogin", type="button")
+                            span.pad-sm
+                            a.btn.btn-sm.btn-social.btn-twitter(id="btn-twitterlogin", href="/auth/twitter", type="button")
                                 i.fa.fa-twitter
                                 | Login with Twitter
                 .form-group

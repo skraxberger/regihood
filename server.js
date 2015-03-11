@@ -48,6 +48,8 @@ app.set('port', process.env.PORT || 3000);
 
 var app_status = process.env.NODE_ENV || 'development';
 
+require('./server/config/passport')(passport); // pass passport for configuration
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash()); // use connect-flash for flash messages stored in session
@@ -63,7 +65,6 @@ passport.deserializeUser(Account.deserializeUser());
 */
 // mongoose
 mongoose.connect('mongodb://localhost:27017/passport_local_mongoose');
-
 require('./server/routes/routes')(app, passport);
 
 //===============PORT=================

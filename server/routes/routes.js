@@ -1,8 +1,7 @@
 /**
  * New node file
  */
-var passport = require('passport'),
-    fs = require('fs'),
+var fs = require('fs'),
     gm = require('gm'),
     Gridfs = require('gridfs-stream'),
     mongoose = require('mongoose'),
@@ -30,7 +29,7 @@ var gfs = new Gridfs(db, mongoDriver);
  *
  * @param app
  */
-module.exports = function (app) {
+module.exports = function (app, passport) {
 
     app.get('/', function (req, res) {
         res.render('index', {user: req.user});
@@ -232,22 +231,17 @@ module.exports = function (app) {
     // LOGIN ===============================
 
     // process the login form
-    app.post('/login', passport.authenticate('local-login', {
-        successRedirect : '/', // redirect to the secure profile section
+    app.post('/login', passport.authenticate('local', {
+        successRedirect : '/stream', // redirect to the secure profile section
         failureRedirect : '/', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
 
     // SIGNUP =================================
-    // show the signup form
-    app.get('/signup', function(req, res) {
-        res.render('signup.ejs', { message: req.flash('loginMessage') });
-    });
-
     // process the signup form
-    app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/signup', // redirect back to the signup page if there is an error
+    app.post('/register', passport.authenticate('register', {
+        successRedirect : '/', // redirect to the secure profile section
+        failureRedirect : '/register', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
 
@@ -292,13 +286,9 @@ module.exports = function (app) {
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
 // =============================================================================
 
-    // locally --------------------------------
-    app.get('/connect/local', function(req, res) {
-        res.render('connect-local.ejs', { message: req.flash('loginMessage') });
-    });
-    app.post('/connect/local', passport.authenticate('local-signup', {
+    app.post('/connect/local', passport.authenticate('register', {
         successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/connect/local', // redirect back to the signup page if there is an error
+        failureRedirect : '/register', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
 
@@ -348,37 +338,37 @@ module.exports = function (app) {
 
     // local -----------------------------------
     app.get('/unlink/local', function(req, res) {
-        var user            = req.user;
-        user.local.email    = undefined;
-        user.local.password = undefined;
-        user.save(function(err) {
+        var account            = req.account;
+        account.local.email    = undefined;
+        account.local.password = undefined;
+        account.save(function(err) {
             res.redirect('/profile');
         });
     });
 
     // facebook -------------------------------
     app.get('/unlink/facebook', function(req, res) {
-        var user            = req.user;
-        user.facebook.token = undefined;
-        user.save(function(err) {
+        var account            = req.account;
+        account.facebook.token = undefined;
+        account.save(function(err) {
             res.redirect('/profile');
         });
     });
 
     // twitter --------------------------------
     app.get('/unlink/twitter', function(req, res) {
-        var user           = req.user;
-        user.twitter.token = undefined;
-        user.save(function(err) {
+        var account           = req.account;
+        account.twitter.token = undefined;
+        account.save(function(err) {
             res.redirect('/profile');
         });
     });
 
     // google ---------------------------------
     app.get('/unlink/google', function(req, res) {
-        var user          = req.user;
-        user.google.token = undefined;
-        user.save(function(err) {
+        var account          = req.account;
+        account.google.token = undefined;
+        account.save(function(err) {
             res.redirect('/profile');
         });
     });
