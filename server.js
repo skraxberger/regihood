@@ -27,33 +27,38 @@ var app = module.exports = express();
  * Configuration
  */
 
-// Point to the directory which provides the html views and partials
+// set up our express application
+app.use(logger('combined'));
+app.use(cookieParser()); // read cookies (needed for auth)
+app.use(bodyParser.json()); // get information from html forms
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.set('views', __dirname + '/client/views');
 app.set('view engine', 'jade');
 
-app.use(logger('combined'));
-app.use(cookieParser());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+// required for passport
+// Point to the directory which provides the html views and partials
 app.use(methodOverride('X-HTTP-Method-Override'));
-app.use(session({secret: 'supernova', saveUninitialized: true, resave: true}));
+//app.use(session({secret: 'supernova', saveUninitialized: true, resave: true}));
 
 // Point to the directory which should be served for client side request
 app.use(express.static(path.join(__dirname, 'client')));
 
+app.use(session({ secret: 'secintoisthebestgivemetherestwhatelse',saveUninitialized: true, resave: true })); // session secret
+app.use(multer());
+app.use(passport.initialize());
+app.use(passport.session()); // persistent login sessions
+app.use(flash()); // use connect-flash for flash messages stored in session
 
 
 // all environments
 app.set('port', process.env.PORT || 3000);
 
+
 var app_status = process.env.NODE_ENV || 'development';
 
 require('./server/config/passport')(passport); // pass passport for configuration
 
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(flash()); // use connect-flash for flash messages stored in session
-app.use(multer());
 
 //passport config
 /*

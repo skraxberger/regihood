@@ -53,7 +53,7 @@ module.exports = function (app, passport) {
         res.redirect('/');
     });
 
-    app.post('/upload', function (req, res) {
+    app.post('/upload', loggedIn, function (req, res) {
 
         var file = req.files.file;
         if (req.body.imageType == 'cover') {
@@ -69,7 +69,7 @@ module.exports = function (app, passport) {
     /*
      Update the cover image position with the information.
      */
-    app.post('/api/image/cover', function (req, res) {
+    app.post('/api/image/cover', loggedIn, function (req, res) {
 
         if (req.session.passport) {
             var user = req.session.passport.user;
@@ -110,19 +110,19 @@ module.exports = function (app, passport) {
 
     });
 
-    app.get('/api/v1/profile/:username', function (request, response) {
+    app.get('/api/v1/profile/:username', loggedIn, function (request, response) {
         // Now we automatically get the story and element in the request object
         //{ story: request.story, element: request.element}
         getProfileInfo(request.username, response);
     });
 
-    app.get('/api/v1/image/:imageId', function (request, response) {
+    app.get('/api/v1/image/:imageId', loggedIn, function (request, response) {
         // Now we automatically get the story and element in the request object
         getImageFromStore(request.imageId, response);
 
     });
 
-    app.get('/api/messages', function (req, res) {
+    app.get('/api/messages', loggedIn, function (req, res) {
 
         /*
          Use mongoose to get all message in the database. Only the once are displayed which are not deleted, duuh and
@@ -138,7 +138,7 @@ module.exports = function (app, passport) {
         });
     });
 
-    app.get('/api/news', function (req, res) {
+    app.get('/api/news', loggedIn, function (req, res) {
 
         // use mongoose to get all news in the database
         NewsItem.find(function (err, news) {
@@ -152,12 +152,13 @@ module.exports = function (app, passport) {
     });
 
     // create message and send back all messages after creation
-    app.post('/api/messages', function (req, res) {
+    app.post('/api/messages', loggedIn, function (req, res) {
 
         // create a message information comes from AJAX request from Angular
         Message.create({
             text: req.body.text,
-            user: req.session.passport.user
+            user: req.user.username,
+            displayName: req.user.displayName
         }, function (err, message) {
             if (err)
                 res.send(err);
@@ -174,7 +175,7 @@ module.exports = function (app, passport) {
     });
 
     // update a message
-    app.post('/api/messages/:message_id', function (req, res) {
+    app.post('/api/messages/:message_id', loggedIn, function (req, res) {
 
         var query = {_id: req.params.message_id};
 
@@ -195,7 +196,7 @@ module.exports = function (app, passport) {
     });
 
     // delete a message
-    app.delete('/api/messages/:message_id', function (req, res) {
+    app.delete('/api/messages/:message_id', loggedIn, function (req, res) {
         var query = {_id: req.params.message_id};
 
         Message.findOneAndUpdate(query, {deleted: true}, function (err, message) {
@@ -212,7 +213,7 @@ module.exports = function (app, passport) {
         });
     });
 
-    app.get('/api/messages/:username', function (req, res) {
+    app.get('/api/messages/:username', loggedIn, function (req, res) {
         // get and return all the messages after you create another
         Message.find({}).where('deleted').equals('false').where('user').equals(req.username).sort('-date').exec(function (err, messages) {
             if (err)
@@ -232,146 +233,42 @@ module.exports = function (app, passport) {
 
     // process the login form
     app.post('/login', passport.authenticate('local', {
-        successRedirect : '/stream', // redirect to the secure profile section
-        failureRedirect : '/', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
+        successRedirect: '/', // redirect to the secure profile section
+        failureRedirect: '/', // redirect back to the signup page if there is an error
+        failureFlash: true // allow flash messages
     }));
 
     // SIGNUP =================================
     // process the signup form
     app.post('/register', passport.authenticate('register', {
-        successRedirect : '/', // redirect to the secure profile section
-        failureRedirect : '/register', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
+        successRedirect: '/', // redirect to the secure profile section
+        failureRedirect: '/register', // redirect back to the signup page if there is an error
+        failureFlash: true // allow flash messages
     }));
 
     // facebook -------------------------------
 
     // send to facebook to do the authentication
-    app.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email' }));
+    app.get('/auth/facebook', passport.authenticate('facebook', {scope: 'email'}));
 
     // handle the callback after facebook has authenticated the user
     app.get('/auth/facebook/callback',
         passport.authenticate('facebook', {
-            successRedirect : '/profile',
-            failureRedirect : '/'
+            successRedirect: '/',
+            failureRedirect: '/'
         }));
-
-    // twitter --------------------------------
-
-    // send to twitter to do the authentication
-    app.get('/auth/twitter', passport.authenticate('twitter', { scope : 'email' }));
-
-    // handle the callback after twitter has authenticated the user
-    app.get('/auth/twitter/callback',
-        passport.authenticate('twitter', {
-            successRedirect : '/profile',
-            failureRedirect : '/'
-        }));
-
 
     // google ---------------------------------
 
     // send to google to do the authentication
-    app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+    app.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email']}));
 
     // the callback after google has authenticated the user
     app.get('/auth/google/callback',
         passport.authenticate('google', {
-            successRedirect : '/profile',
-            failureRedirect : '/'
+            successRedirect: '/',
+            failureRedirect: '/'
         }));
-
-// =============================================================================
-// AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
-// =============================================================================
-
-    app.post('/connect/local', passport.authenticate('register', {
-        successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/register', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
-
-    // facebook -------------------------------
-
-    // send to facebook to do the authentication
-    app.get('/connect/facebook', passport.authorize('facebook', { scope : 'email' }));
-
-    // handle the callback after facebook has authorized the user
-    app.get('/connect/facebook/callback',
-        passport.authorize('facebook', {
-            successRedirect : '/profile',
-            failureRedirect : '/'
-        }));
-
-    // twitter --------------------------------
-
-    // send to twitter to do the authentication
-    app.get('/connect/twitter', passport.authorize('twitter', { scope : 'email' }));
-
-    // handle the callback after twitter has authorized the user
-    app.get('/connect/twitter/callback',
-        passport.authorize('twitter', {
-            successRedirect : '/profile',
-            failureRedirect : '/'
-        }));
-
-
-    // google ---------------------------------
-
-    // send to google to do the authentication
-    app.get('/connect/google', passport.authorize('google', { scope : ['profile', 'email'] }));
-
-    // the callback after google has authorized the user
-    app.get('/connect/google/callback',
-        passport.authorize('google', {
-            successRedirect : '/profile',
-            failureRedirect : '/'
-        }));
-
-// =============================================================================
-// UNLINK ACCOUNTS =============================================================
-// =============================================================================
-// used to unlink accounts. for social accounts, just remove the token
-// for local account, remove email and password
-// user account will stay active in case they want to reconnect in the future
-
-    // local -----------------------------------
-    app.get('/unlink/local', function(req, res) {
-        var account            = req.account;
-        account.local.email    = undefined;
-        account.local.password = undefined;
-        account.save(function(err) {
-            res.redirect('/profile');
-        });
-    });
-
-    // facebook -------------------------------
-    app.get('/unlink/facebook', function(req, res) {
-        var account            = req.account;
-        account.facebook.token = undefined;
-        account.save(function(err) {
-            res.redirect('/profile');
-        });
-    });
-
-    // twitter --------------------------------
-    app.get('/unlink/twitter', function(req, res) {
-        var account           = req.account;
-        account.twitter.token = undefined;
-        account.save(function(err) {
-            res.redirect('/profile');
-        });
-    });
-
-    // google ---------------------------------
-    app.get('/unlink/google', function(req, res) {
-        var account          = req.account;
-        account.google.token = undefined;
-        account.save(function(err) {
-            res.redirect('/profile');
-        });
-    });
 
     app.get('*', function (req, res) {
         logger.info({originalUrl: req.originalUrl}, "General router sending index");
@@ -560,11 +457,11 @@ function resizeImage(file) {
 
 function loggedIn(req, res, next) {
     if (req.user && req.isAuthenticated()) {
-        next();
-    } else {
-        res.redirect(301, '/login');
+        return next();
     }
+    res.redirect(301, '/login');
 }
+
 
 function makeDeepCopy(model, upsertData) {
     model.user = upsertData.user;

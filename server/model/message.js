@@ -11,6 +11,7 @@ var Schema = mongoose.Schema;
 
 var Message = new Schema({
     user : String, /* Creator this message */
+    displayName : String,
     text : String, /* Content as pure string */
     editEnabled : { type: Boolean, default: false}, /* Can this message be modified */
     likes : [String], /* List of users who liked this message */

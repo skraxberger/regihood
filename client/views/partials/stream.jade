@@ -16,11 +16,22 @@ div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user
                 .card-heading
                     .card-heading-header
                         h6 Mein Blabla
-                .card-body
-                    textarea.form-control.simplebox(placeholder="Nachricht", ng-model="post.text", name="messagebox", id="messagebox", style="background-color: #E5E5E5;")
+                .card-body(ng-click="editing=true", ng-)
+                    textarea.form-control.simplebox(placeholder="Nachricht", ng-model="post.text", name="messagebox", ng-keyup="checkContent()", id="messagebox")
                 .card-actions
+                    textarea.mediabox(ng-show="mediaAvailable")
+                .card-edit-symbols
                     .clearfix
-                        button.btn.btn-primary.pull-right(type="submit", ng-click="createMessage()") Teilen
+                        .iconBox(ng-show="editing")
+                            i.fa.fa-file-image-o(ng-click="openImageDialog()")
+                        .iconBox(ng-show="editing")
+                            i.fa.fa-child(ng-click="tagPeople()")
+                        .iconBox(ng-show="editing")
+                            i.fa.fa-smile-o(ng-click="emoticons()")
+                        .iconBox(ng-show="editing")
+                            i.fa.fa-map-marker(ng-click="markLocation()")
+                        button.btn-xs.btn-primary.pull-right(ng-show="editing", style="vertical-align:middle", type="submit", ng-click="createMessage()") Teilen
+
         .col-xs-6.col-sm-3
             .card.special
                 .card-heading
@@ -41,7 +52,7 @@ div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user
                         img(ng-src="img/profile-32.png", alt="")
                         .card-heading-header
                             h3
-                                a(ng-click="getProfileOfUser(message.user)") {{message.user}}
+                                a(ng-click="getProfileOfUser(message.user)") {{message.displayName}}
                             span
                             | {{message.date | date:"dd.MM.yyyy hh:mm"}}
                     .card-body
