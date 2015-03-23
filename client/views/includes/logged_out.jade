@@ -2,5 +2,7 @@
     .row
         .col-xs-6
             include front_welcome
+            if message && message.length
+                .alert.alert-danger #{message}
         .col-xs-6
             include signin-form

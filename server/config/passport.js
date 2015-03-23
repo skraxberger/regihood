@@ -22,7 +22,7 @@ module.exports = function (passport) {
 
     // used to serialize the user for the session
     passport.serializeUser(function (account, done) {
-        done(null, account.id);
+        return done(null, account.id);
     });
 
     passport.deserializeUser(function (id, done) {
@@ -31,10 +31,10 @@ module.exports = function (passport) {
                 logger.error({error: error}, "Couldn't find user with id " + id + " for deserialization");
             }
             if (user) {
-                done(err, user);
+                return done(err, user);
             }
             else {
-                done(err, false);
+                return done(err, false);
             }
         });
     });
@@ -96,8 +96,24 @@ module.exports = function (passport) {
                         return done(err);
 
                     // check to see if there's already a user with that email
-                    if (existingAccount)
-                        return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+                    if (existingAccount) {
+                        if (existingAccount.local.email) {
+                            return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+                        }
+                        else {
+                            existingAccount.local.email = email;
+                            existingAccount.local.password = existingAccount.generateHash(password);
+                            existingAccount.local.name.familyName = req.body.lastname;
+                            existingAccount.local.name.givenName = req.body.firstname;
+
+                            existingAccount.save(function (err) {
+                                if (err)
+                                    throw err;
+
+                                return done(null, existingAccount);
+                            });
+                        }
+                    }
 
                     //  If we're logged in, we're connecting a new local account.
                     if (req.account) {
@@ -235,101 +251,101 @@ module.exports = function (passport) {
     // =========================================================================
     // TWITTER =================================================================
     // =========================================================================
-/*
-    passport.use(new TwitterStrategy({
+    /*
+     passport.use(new TwitterStrategy({
 
-            consumerKey: configAuth.twitterAuth.consumerKey,
-            consumerSecret: configAuth.twitterAuth.consumerSecret,
-            callbackURL: configAuth.twitterAuth.callbackURL,
-            passReqToCallback: true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
+     consumerKey: configAuth.twitterAuth.consumerKey,
+     consumerSecret: configAuth.twitterAuth.consumerSecret,
+     callbackURL: configAuth.twitterAuth.callbackURL,
+     passReqToCallback: true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
 
-        },
-        function (req, token, tokenSecret, profile, done) {
+     },
+     function (req, token, tokenSecret, profile, done) {
 
-            // asynchronous
-            process.nextTick(function () {
+     // asynchronous
+     process.nextTick(function () {
 
-                // check if the user is already logged in
-                if (!req.user) {
+     // check if the user is already logged in
+     if (!req.user) {
 
-                    Account.findOne({'username': profile.emails[0].value}, function (err, account) {
-                        if (err)
-                            return done(err);
+     Account.findOne({'username': profile.emails[0].value}, function (err, account) {
+     if (err)
+     return done(err);
 
-                        if (account) {
-                            // if there is a user id already but no token (user was linked at one point and then removed)
-                            if (!account.twitter.token) {
-                                account.twitter.token = token;
-                                account.twitter.username = profile.username;
-                                account.twitter.displayName = profile.displayName;
+     if (account) {
+     // if there is a user id already but no token (user was linked at one point and then removed)
+     if (!account.twitter.token) {
+     account.twitter.token = token;
+     account.twitter.username = profile.username;
+     account.twitter.displayName = profile.displayName;
 
-                                account.twitter.name.givenName = profile.name.givenName;
-                                account.twitter.name.familyName = profile.name.familyName;
-                                account.twitter.name.middleName = profile.name.middleName;
+     account.twitter.name.givenName = profile.name.givenName;
+     account.twitter.name.familyName = profile.name.familyName;
+     account.twitter.name.middleName = profile.name.middleName;
 
-                                account.twitter.email = profile.emails[0].value; // pull the first email
+     account.twitter.email = profile.emails[0].value; // pull the first email
 
-                                account.save(function (err) {
-                                    if (err)
-                                        throw err;
-                                    return done(null, account);
-                                });
-                            }
+     account.save(function (err) {
+     if (err)
+     throw err;
+     return done(null, account);
+     });
+     }
 
-                            return done(null, account); // user found, return that user
-                        } else {
-                            // if there is no user, create them
-                            var newAccount = new Account();
+     return done(null, account); // user found, return that user
+     } else {
+     // if there is no user, create them
+     var newAccount = new Account();
 
-                            // TODO: Provide a secure function for generating usernames
-                            newAccount.username = profile.username;
+     // TODO: Provide a secure function for generating usernames
+     newAccount.username = profile.username;
 
-                            newAccount.twitter.id = profile.id;
-                            newAccount.twitter.token = token;
-                            newAccount.twitter.username = profile.username;
-                            newAccount.twitter.displayName = profile.displayName;
+     newAccount.twitter.id = profile.id;
+     newAccount.twitter.token = token;
+     newAccount.twitter.username = profile.username;
+     newAccount.twitter.displayName = profile.displayName;
 
-                            newAccount.twitter.name.givenName = profile.name.givenName;
-                            newAccount.twitter.name.familyName = profile.name.familyName;
-                            newAccount.twitter.name.middleName = profile.name.middleName;
+     newAccount.twitter.name.givenName = profile.name.givenName;
+     newAccount.twitter.name.familyName = profile.name.familyName;
+     newAccount.twitter.name.middleName = profile.name.middleName;
 
-                            newAccount.twitter.email = profile.emails[0].value; // pull the first email
+     newAccount.twitter.email = profile.emails[0].value; // pull the first email
 
 
-                            newAccount.save(function (err) {
-                                if (err)
-                                    throw err;
-                                return done(null, newAccount);
-                            });
-                        }
-                    });
+     newAccount.save(function (err) {
+     if (err)
+     throw err;
+     return done(null, newAccount);
+     });
+     }
+     });
 
-                } else {
-                    // user already exists and is logged in, we have to link accounts
-                    var account = req.user; // pull the user out of the session
+     } else {
+     // user already exists and is logged in, we have to link accounts
+     var account = req.user; // pull the user out of the session
 
-                    account.twitter.id = profile.id;
-                    account.twitter.token = token;
-                    account.twitter.username = profile.username;
-                    account.twitter.displayName = profile.displayName;
+     account.twitter.id = profile.id;
+     account.twitter.token = token;
+     account.twitter.username = profile.username;
+     account.twitter.displayName = profile.displayName;
 
-                    account.twitter.name.givenName = profile.name.givenName;
-                    account.twitter.name.familyName = profile.name.familyName;
-                    account.twitter.name.middleName = profile.name.middleName;
+     account.twitter.name.givenName = profile.name.givenName;
+     account.twitter.name.familyName = profile.name.familyName;
+     account.twitter.name.middleName = profile.name.middleName;
 
-                    account.twitter.email = profile.emails[0].value; // pull the first email
+     account.twitter.email = profile.emails[0].value; // pull the first email
 
-                    account.save(function (err) {
-                        if (err)
-                            throw err;
-                        return done(null, account);
-                    });
-                }
+     account.save(function (err) {
+     if (err)
+     throw err;
+     return done(null, account);
+     });
+     }
 
-            });
+     });
 
-        }));
-*/
+     }));
+     */
     // =========================================================================
     // GOOGLE ==================================================================
     // =========================================================================

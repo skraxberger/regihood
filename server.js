@@ -46,9 +46,9 @@ app.use(express.static(path.join(__dirname, 'client')));
 
 app.use(session({ secret: 'secintoisthebestgivemetherestwhatelse',saveUninitialized: true, resave: true })); // session secret
 app.use(multer());
+app.use(flash()); // use connect-flash for flash messages stored in session
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
-app.use(flash()); // use connect-flash for flash messages stored in session
 
 
 // all environments
@@ -80,5 +80,5 @@ io.sockets.on('connection', require('./server/routes/socket'));
 */
 
 server.listen(app.get('port'), function () {
-    console.log('Express server with socket.io listening on port ' + app.get('port'));
+    console.log('Express server listening on port ' + app.get('port'));
 });

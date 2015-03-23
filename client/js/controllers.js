@@ -10,6 +10,23 @@ regihoodApp.controller("AreaButtonController", function ($scope) {
     }
 });
 
+regihoodApp.controller("LoginController", function($scope) {
+   $scope.login = true;
+
+    var init = function () {
+        var url = document.URL;
+        if(endsWith(url,"register")) {
+            $scope.login = false;
+        }
+    };
+
+    function endsWith(str, suffix) {
+        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    }
+// and fire it after definition
+    init();
+});
+
 /**
  *
  */
