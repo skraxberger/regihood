@@ -1,4 +1,4 @@
-div(ng-controller="LoginController")
+div(ng-controller="LoginController", ng-init="login = true")
     .mainbox(ng-show="login", id="loginbox", style="margin-top:20px;")
         .panel.panel-info
             .panel-heading
@@ -37,14 +37,14 @@ div(ng-controller="LoginController")
                     .form-group
                         .col-md-12.controls
                             div(style="border-top: 1px solid#888; padding-top:15px; font-size:85%") Don't have an account!
-                                | <a href="#" ng-click="login=false">Sign Up Here</a>
+                                | <a ng-click="login=false">Sign Up Here</a>
 
     .mainbox(ng-hide="login", id="signupbox", style="margin-top:20px")
         .panel.panel-info
             .panel-heading
                 .panel-title Sign Up
                 div(style="float:right; font-size: 85%; position: relative; top:-10px")
-                    | <a id="signinlink" href="#" onClick="$('#signupbox').hide(); $('#loginbox').show()">Sign In</a>
+                    | <a ng-click="login=true">Sign In</a>
             .panel-body
                 form.form-horizontal(id="registration-form", role="form", action="/register", method="post")
                     .alert.alert-danger(id="signupalert", style="display:none")

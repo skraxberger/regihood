@@ -10,12 +10,12 @@ regihoodApp.controller("AreaButtonController", function ($scope) {
     }
 });
 
-regihoodApp.controller("LoginController", function($scope) {
-   $scope.login = true;
+regihoodApp.controller("LoginController", function ($scope) {
+    $scope.login = true;
 
     var init = function () {
         var url = document.URL;
-        if(endsWith(url,"register")) {
+        if (endsWith(url, "register")) {
             $scope.login = false;
         }
     };
@@ -23,6 +23,7 @@ regihoodApp.controller("LoginController", function($scope) {
     function endsWith(str, suffix) {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
+
 // and fire it after definition
     init();
 });
@@ -92,13 +93,13 @@ regihoodApp.controller("PublicProfileController", function ($scope, $http) {
 
 });
 
-regihoodApp.controller("MessageController", function ($scope, $http) {
+regihoodApp.controller("MessageController", function ($scope, $http, $attrs) {
         $scope.post = {};
         $scope.messages = [];
         $scope.news = [];
-
         $scope.label = {};
         $scope.label.comment = {edit: "Editieren", delete: "Löschen", update: "Ändern"};
+        $scope.currentUser = {};
 
         var commentsChanged = false;
         var messagesChanged = false;
@@ -116,11 +117,19 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         }];
         var dropdownGeneral = [{id: "hide", name: "Verstecken"}, {id: "unfollow", name: "Abbestellen"}];
 
-
         /*
          When landing on the page, get all messages and show them.
          TODO: In future it should only show the first something and all others should be fetched only if necessary -> Pagination
          */
+        $http.get('/api/currentuser')
+            .success(function (data) {
+                $scope.currentUser = data;
+            })
+            .error(function (error) {
+                console.log('Error: ' + error);
+            });
+
+
         $http.get('/api/messages')
             .success(function (data) {
                 retrievedMessages = data;
@@ -136,10 +145,14 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
          */
         $http.get('/api/news')
             .success(function (data) {
-                $scope.news = data;
+                if (data)
+                    $scope.news = data;
+                else
+                    $scope.news = [];
             })
             .error(function (data) {
                 console.log('Error: ' + data);
+                $scope.news = [];
             });
 
 
@@ -296,17 +309,19 @@ regihoodApp.controller("MessageController", function ($scope, $http) {
         $scope.filterComments = function (message) {
             var comments = message.comments;
             var usedComments = [];
-            for (var index = 0; index < comments.length; index++) {
-                if (typeof comments[index].hide == 'undefined' || comments[index].hide.indexOf($scope.currentUser) < 0) {
-                    comments[index].dropdown = false;
-                    if (comments[index].author == $scope.currentUser) {
-                        comments[index].dropdown = true;
-                        comments[index].tooltipAction = "Edit or Delete";
+            if (comments) {
+                for (var index = 0; index < comments.length; index++) {
+                    if (typeof comments[index].hide == 'undefined' || comments[index].hide.indexOf($scope.currentUser) < 0) {
+                        comments[index].dropdown = false;
+                        if (comments[index].author == $scope.currentUser) {
+                            comments[index].dropdown = true;
+                            comments[index].tooltipAction = "Edit or Delete";
+                        }
+                        else {
+                            comments[index].tooltipAction = "Hide";
+                        }
+                        usedComments.push(comments[index]);
                     }
-                    else {
-                        comments[index].tooltipAction = "Hide";
-                    }
-                    usedComments.push(comments[index]);
                 }
             }
             return usedComments;

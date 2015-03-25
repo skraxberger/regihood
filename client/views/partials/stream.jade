@@ -1,10 +1,4 @@
-div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user.username}'")
-    .row
-        pre#uiRouterInfo
-            | $state = {{$state.current.name}}
-            | $stateParams = {{$stateParams}}
-            | $state full url = {{ $state.$current.url.source }}
-            | Current User = {{currentUser}}
+div(ng-controller="MessageController as msgCtrl")
     .row
         .col-xs-6.col-sm-2
             .card.special
@@ -56,8 +50,7 @@ div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user
                             span
                             | {{message.date | date:"dd.MM.yyyy hh:mm"}}
                     .card-body
-                        div(ng-hide="message.editEnabled")
-                            {{message.text}}
+                        div(ng-hide="message.editEnabled") {{message.text}}
                         div(ng-show="message.editEnabled")
                             textarea.form-control.simplebox(ng-model="message.text", style="background-color: #E5E5E5;")
                             .clearfix
@@ -82,8 +75,7 @@ div(ng-controller="MessageController as msgCtrl", ng-init="currentUser = '#{user
                                             li
                                                 a(href="", ng-click="commentDelete(message, comment)") {{label.comment.delete}}
                                     h4.media-heading {{comment.author}}
-                                    div(ng-hide="comment.editEnabled")
-                                        {{comment.content}}
+                                    div(ng-hide="comment.editEnabled") {{comment.content}}
                                     div(ng-show="comment.editEnabled")
                                         textarea.form-control.simplebox(ng-model="comment.content", style="background-color: #E5E5E5;")
                                         .clearfix

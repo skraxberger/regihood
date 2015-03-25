@@ -24,7 +24,7 @@ var Message = new Schema({
 });
 
 Message.post('save', function (doc) {
-    logger.info({documentId: doc._id}, 'Document has been saved');
+    logger.info({documentId: doc._id}, 'Message has been saved');
 })
 
 module.exports = mongoose.model('Message', Message);

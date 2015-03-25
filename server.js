@@ -55,22 +55,15 @@ app.use(passport.session()); // persistent login sessions
 app.set('port', process.env.PORT || 3000);
 
 
-var app_status = process.env.NODE_ENV || 'development';
-
-require('./server/config/passport')(passport); // pass passport for configuration
-
-
-//passport config
-/*
-var Account = require('./server/model/account');
-passport.use(new LocalStrategy(Account.authenticate()));
-
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
-*/
 // mongoose
 mongoose.connect('mongodb://localhost:27017/passport_local_mongoose');
+
+
+require('./server/config/passport')(passport); // pass passport for configuration
 require('./server/routes/routes')(app, passport);
+require('./server/routes/social')(app);
+require('./server/routes/market')(app);
+require('./server/routes/last')(app);
 
 //===============PORT=================
 var server = http.createServer(app);

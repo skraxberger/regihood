@@ -15,13 +15,12 @@ html(data-ng-app="regihoodApp")
                 | $state = {{$state.current.name}}
                 | $stateParams = {{$stateParams}}
                 | $state full url = {{ $state.$current.url.source }}
-        .container(data-ui-view)
-            if (!user)
-                include includes/navbar_logged_out
-                include includes/logged_out
-            else
-                include includes/navbar_logged_in
-                include includes/logged_in
+        if (!user)
+            include includes/navbar_logged_out
+            include includes/logged_out
+        else
+            include includes/navbar_logged_in
+            include includes/logged_in
 
         script(src='components/jquery/dist/jquery.min.js')
         script(src='components/angular/angular.min.js')
@@ -32,6 +31,7 @@ html(data-ng-app="regihoodApp")
         script(src='components/angular-bootstrap/ui-bootstrap-tpls.min.js')
         script(src='components/bootstrap/dist/js/bootstrap.min.js')
         script(src='components/ngInfiniteScroll/build/ng-infinite-scroll.min.js')
+        script(src='js/library.js')
         script(src='js/app.js')
         script(src='js/controllers.js')
         script(src='js/directives.js')
