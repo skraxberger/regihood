@@ -31,7 +31,7 @@ module.exports = function (app) {
 //                                  API
 // =============================================================================
 
-    app.post('/upload', loggedIn, function (req, res) {
+    app.post('/upload', library.loggedIn, function (req, res) {
 
         var file = req.files.file;
         if (req.body.imageType == 'cover') {
@@ -47,7 +47,7 @@ module.exports = function (app) {
     /*
      Update the cover image position with the information.
      */
-    app.post('/api/image/cover', loggedIn, function (req, res) {
+    app.post('/api/image/cover', library.loggedIn, function (req, res) {
 
         if (req.session.passport) {
             var user = req.session.passport.user;
@@ -88,19 +88,19 @@ module.exports = function (app) {
 
     });
 
-    app.get('/api/v1/profile/:username', loggedIn, function (request, response) {
+    app.get('/api/v1/profile/:username', library.loggedIn, function (request, response) {
         // Now we automatically get the story and element in the request object
         //{ story: request.story, element: request.element}
         getProfileInfo(request.username, response);
     });
 
-    app.get('/api/v1/image/:imageId', loggedIn, function (request, response) {
+    app.get('/api/v1/image/:imageId', library.loggedIn, function (request, response) {
         // Now we automatically get the story and element in the request object
         db.getFile(request.imageId, response);
 
     });
 
-    app.get('/api/messages', loggedIn, function (req, res) {
+    app.get('/api/messages', library.loggedIn, function (req, res) {
 
         /*
          Use mongoose to get all message in the database. Only the once are displayed which are not deleted, duuh and
@@ -116,7 +116,7 @@ module.exports = function (app) {
         });
     });
 
-    app.get('/api/news', loggedIn, function (req, res) {
+    app.get('/api/news', library.loggedIn, function (req, res) {
 
         // use mongoose to get all news in the database
         NewsItem.find(function (err, news) {
@@ -130,7 +130,7 @@ module.exports = function (app) {
     });
 
 // create message and send back all messages after creation
-    app.post('/api/messages', loggedIn, function (req, res) {
+    app.post('/api/messages', library.loggedIn, function (req, res) {
 
         // create a message information comes from AJAX request from Angular
         Message.create({
@@ -153,7 +153,7 @@ module.exports = function (app) {
     });
 
 // update a message
-    app.post('/api/messages/:message_id', loggedIn, function (req, res) {
+    app.post('/api/messages/:message_id', library.loggedIn, function (req, res) {
 
         var query = {_id: req.params.message_id};
 
@@ -174,7 +174,7 @@ module.exports = function (app) {
     });
 
 // delete a message
-    app.delete('/api/messages/:message_id', loggedIn, function (req, res) {
+    app.delete('/api/messages/:message_id', library.loggedIn, function (req, res) {
         var query = {_id: req.params.message_id};
 
         Message.findOneAndUpdate(query, {deleted: true}, function (err, message) {
@@ -191,7 +191,7 @@ module.exports = function (app) {
         });
     });
 
-    app.get('/api/messages/:username', loggedIn, function (req, res) {
+    app.get('/api/messages/:username', library.loggedIn, function (req, res) {
         // get and return all the messages after you create another
         Message.find({}).where('deleted').equals('false').where('user').equals(req.username).sort('-date').exec(function (err, messages) {
             if (err)
@@ -202,7 +202,7 @@ module.exports = function (app) {
 
     });
 
-    app.get('/api/currentuser', loggedIn, function (req, res) {
+    app.get('/api/currentuser', library.loggedIn, function (req, res) {
         if (req.user.username) {
             res.json({user: req.user.username});
         }
@@ -323,22 +323,6 @@ function resizeImage(file) {
             logger.error({error: err, file: file}, "Couldn't resize image");
     });
 
-}
-
-/**
- * Checks whether the client is logged in or not. If the client is logged in the request must contain
- * a user object as well as isAuthenticated must be true.
- *
- * @param req The request object
- * @param res The response object
- * @param next The next object
- * @returns {*}
- */
-function loggedIn(req, res, next) {
-    if (req.user && req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect(301, '/login');
 }
 
 /**

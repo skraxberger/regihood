@@ -30,19 +30,28 @@ module.exports = function (app) {
 //                                  API
 // =============================================================================
 
-    app.post('/api/market', loggedIn, function (req, res) {
-        Product.create(req.product, function (err, message) {
+    app.post('/api/market', library.loggedIn, function (req, res) {
+        Product.create(req.body, function (err, product) {
             if (err)
                 res.send(err);
 
             // get and return all the messages after you create another
-            Product.find({}).where('deleted').equals('false').sort('-date').exec(function (err, messages) {
+            Product.find({}).exec(function (err, products) {
                 if (err)
                     res.send(err)
 
-                res.json(messages); // return all messages in JSON format
+                res.json(products); // return all messages in JSON format
             });
         })
+    });
+
+    app.get('/api/market', library.loggedIn, function (req, res) {
+        Product.find({}).exec(function (err, product) {
+            if (err)
+                res.send(err)
+
+            res.json(product); // return all messages in JSON format
+        });
     });
 
 };

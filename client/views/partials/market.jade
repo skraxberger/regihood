@@ -1,5 +1,40 @@
-//
-   Created by skraxberger on 04.02.2015.
-.container
-    .row
-        h1 MARKET AREA
+div(ng-controller="ProductController as ProdCtrl")
+    .row(style="margin-top: 20px")
+        .col-md-2
+        .col-md-8
+            form.form-inline
+                .col-md-4
+                    label.control-label(for="productFilter") Suchen nach:
+                .col-md-8
+                    input.form-control(type="text", ng-model="query", name="productFilter", ng-change="filterProducts()", autofocus)
+        .col-md-2
+    .row(style="margin-top: 20px")
+        .col-md-3
+        .col-md-6
+            .row.form-group
+                .col-md-3
+                    label.control-label(for="productName") Produktname:
+                .col-md-6
+                    input.form-control(type="text", ng-model="item.name", name="productName")
+            .row.form-group
+                .col-md-3
+                    label.control-label(for="productName") Beschreibung:
+                .col-md-6
+                    textarea.form-control(type="text", ng-model="item.description", name="productDescription")
+            .row.form-group
+                .col-md-3
+                    label.control-label(for="productName") Preis:
+                .col-md-6
+                    input.form-control(type="number", ng-model="item.priceDist", name="productRetailPrice")
+            .row
+                button.btn-sm.btn-primary.pull-right(type="submit", ng-click="createProduct()") Eintragen
+        .col-md-3
+    .row(style="margin-top: 20px")
+    .row(ng-repeat="rowProducts in filteredProducts")
+        .col-xs-4.col-md-3(ng-repeat="product in rowProducts")
+            ul.thumbnails
+                li.list-inline
+                    a(ng-href="/product/{{product._id}}").thumbnail
+                        img(src="http://placehold.it/210x160", alt="")
+                        h6 {{product.name}}
+                            p.pull-right € {{product.priceDist}}

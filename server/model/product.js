@@ -15,22 +15,22 @@ var Schema = mongoose.Schema;
 var Product = new Schema({
     owner : String, /* Creator this message */
     name : String,
-    text : String, /* Content as pure string */
+    description : String, /* Content as pure string */
     likes : [String], /* List of users who liked this message */
     comments: [], /* Added comments */
     priceSelf : Number,
     priceDist : Number,
     priceMarket : Number,
-    quantityMinimum : Number,
-    quantityMaximum : Number,
-    unit : String,
-    availability : String,
+    quantityMinimum : {type: Number, default: 1},
+    quantityMaximum : {type: Number, default: -1},
+    unit : {type: String, default: "single"},
+    availability : {type: String, default : "alltime"},
     image: {type: String, default: 'img/item-empty.jpg'},
     deleted : {type: Boolean, default: false},
     date : { type: Date, default: Date.now } /* Message creation date */
 });
 
-ShopItem.post('save', function (doc) {
+Product.post('save', function (doc) {
     logger.info({documentId: doc._id}, 'Product has been saved');
 })
 

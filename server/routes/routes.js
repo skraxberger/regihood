@@ -99,20 +99,3 @@ module.exports = function (app, passport) {
 //                               General functions which could be used more than once
 //===========================================================================================================
 
-
-/**
- * Checks whether the client is logged in or not. If the client is logged in the request must contain
- * a user object as well as isAuthenticated must be true.
- *
- * @param req The request object
- * @param res The response object
- * @param next The next object
- * @returns {*}
- */
-function loggedIn(req, res, next) {
-    if (req.user && req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect(301, '/login');
-}
-
