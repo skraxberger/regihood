@@ -200,6 +200,10 @@ regihoodApp.controller("MessageController", function ($scope, $http, $attrs) {
         console.log(message.text);
     };
 
+    /*
+     * Needs to be updated to fetch some messages ahead of already displayed ones otherwise we would wait to long
+     * if a lot of messages exist
+     */
     $scope.filterMessages = function () {
         console.log("Inside filter messages");
         var messageLength = retrievedMessages.length;
@@ -530,6 +534,11 @@ regihoodApp.controller('ProductController', function ($scope, $http) {
     $scope.item = {};
     $scope.products = [];
     $scope.query = "";
+    $scope.displayedProducts = [];
+
+    var maxInitialProducts = 8;
+    var lastIndex = 0;
+
 
     var lengthOfSubArray = 4;
 
@@ -544,7 +553,7 @@ regihoodApp.controller('ProductController', function ($scope, $http) {
     $http.get('/api/market')
         .success(function (data) {
             $scope.products = data;
-            $scope.filterProducts($scope.products);
+            $scope.filterProducts($scope);
         })
         .error(function (error) {
             console.log('Error: ' + error);
@@ -556,7 +565,8 @@ regihoodApp.controller('ProductController', function ($scope, $http) {
         $http.post('/api/market', $scope.item)
             .success(function (data) {
                 $scope.products = data;
-                $scope.products.unshift(data[0]);
+                //$scope.products.unshift(data[0]);
+                $scope.filterProducts($scope);
             })
             .error(function (error) {
                 console.log('Error: ' + error);
@@ -564,25 +574,36 @@ regihoodApp.controller('ProductController', function ($scope, $http) {
         $scope.item = {}; // clear the form so our user is ready to enter another
     }
 
+
+    $scope.paginateProducts = function () {
+        if ($scope.products.length > 0) {
+            if (!$scope.filteredProducts) {
+                $scope.filterProducts();
+            }
+            var productsLength = $scope.filteredProducts.length;
+
+            for (var index = 0; lastIndex < productsLength, index < maxInitialProducts; index++) {
+                $scope.displayedProducts.push($scope.filteredProducts[lastIndex++]);
+            }
+        }
+    }
+
     $scope.filterProducts = function () {
-        var arrayToReturn = [];
+         var arrayToReturn = [];
 
         if ($scope.products.length > 0) {
             var subArray = [];
             var pushed = true;
             for (var i = 0; i < $scope.products.length; i++) {
-                if ($scope.products[i].name) {
-                    if ($scope.query === '' || $scope.products[i].name.indexOf($scope.query) >= 0) {
-                        if ((i + 1) % lengthOfSubArray == 0) {
-                            subArray.push($scope.products [i]);
-                            arrayToReturn.push(subArray);
-                            subArray = [];
-                            pushed = true;
-                        } else {
-                            subArray.push($scope.products [i]);
-                            pushed = false;
-
-                        }
+                if ($scope.query === '' || $scope.products[i].name.indexOf($scope.query) >= 0) {
+                    if ((i + 1) % lengthOfSubArray == 0) {
+                        subArray.push($scope.products [i]);
+                        arrayToReturn.push(subArray);
+                        subArray = [];
+                        pushed = true;
+                    } else {
+                        subArray.push($scope.products [i]);
+                        pushed = false;
                     }
                 }
             }
@@ -592,9 +613,9 @@ regihoodApp.controller('ProductController', function ($scope, $http) {
             console.log(JSON.stringify(arrayToReturn));
 
             $scope.filteredProducts = arrayToReturn;
+            lastIndex = 0;
         }
     }
-
 });
 
 

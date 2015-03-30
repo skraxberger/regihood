@@ -15,7 +15,7 @@ div(ng-controller="ProductController as ProdCtrl")
                 .col-md-3
                     label.control-label(for="productName") Produktname:
                 .col-md-6
-                    input.form-control(type="text", ng-model="item.name", name="productName")
+                    input.form-control(type="text", ng-model="item.name", name="productName" required)
             .row.form-group
                 .col-md-3
                     label.control-label(for="productName") Beschreibung:
@@ -25,16 +25,17 @@ div(ng-controller="ProductController as ProdCtrl")
                 .col-md-3
                     label.control-label(for="productName") Preis:
                 .col-md-6
-                    input.form-control(type="number", ng-model="item.priceDist", name="productRetailPrice")
+                    input.form-control(type="number", ng-model="item.priceDist", name="productRetailPrice" required)
             .row
                 button.btn-sm.btn-primary.pull-right(type="submit", ng-click="createProduct()") Eintragen
         .col-md-3
     .row(style="margin-top: 20px")
-    .row(ng-repeat="rowProducts in filteredProducts")
-        .col-xs-4.col-md-3(ng-repeat="product in rowProducts")
-            ul.thumbnails
-                li.list-inline
-                    a(ng-href="/product/{{product._id}}").thumbnail
-                        img(src="http://placehold.it/210x160", alt="")
-                        h6 {{product.name}}
-                            p.pull-right € {{product.priceDist}}
+    div(infinite-scroll="filterProducts()", infinite-scroll-distance="0")
+        .row(ng-repeat="rowProducts in filteredProducts")
+            .col-xs-4.col-md-3(ng-repeat="product in rowProducts")
+                ul.thumbnails
+                    li.list-inline
+                        a(ng-href="/product/{{product._id}}").thumbnail
+                            img(src="http://placehold.it/210x160", alt="")
+                            h6 {{product.name}}
+                                p.pull-right € {{product.priceDist}}
