@@ -13,4 +13,5 @@ div(ng-controller="ProductController as ProdCtrl")
                     .card-heading-header
                         h4 {{productInfo.name}}
                 .card-body
+                    img(ng-src="{{productInfo.image}}")
                     p {{productInfo.description}}

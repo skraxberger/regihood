@@ -41,6 +41,6 @@ div(ng-controller="MarketController as MrktCtrl")
                 ul.thumbnails
                     li.list-inline
                         a(ng-click="getProductPage(product)").thumbnail
-                            img(src="http://placehold.it/210x160", alt="")
+                            img(ng-src="{{product.image}}", alt="")
                             h6 {{product.name}}
                                 p.pull-right € {{product.priceDist}}

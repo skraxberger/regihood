@@ -26,11 +26,33 @@ module.exports = function (app) {
         var file = req.files.file;
         if (req.body.imageType == 'cover') {
             resizeImage(file);
-            storeImage(file, req.body, req.session.passport.user, res);
         }
-        else {
-            storeImage(file, req.body, req.session.passport.user, res);
-        }
+
+        db.storeFile(file, req.body, function (data, error) {
+            if (error) {
+                res.writeHead(200, {"Content-Type": "text/plain"});
+                res.write("Failure");
+                res.end();
+            }
+            else {
+                res.json({filename: file.name});
+
+                if (req.body.imageType === 'cover' || req.body.imageType === 'profile') {
+                    var query = {username: user};
+                    if (metadata.imageType == 'profile')
+                        var update = {profileImage: file.name};
+                    else
+                        var update = {coverImage: file.name};
+
+                    Account.findOneAndUpdate(query, update, function (err, message) {
+                        if (err)
+                            logger.error({error: err}, "Couldn't update account with image file info");
+                        else
+                            logger.info({image: file.name, user: user}, "Updated image info in user account");
+                    });
+                }
+            }
+        });
     });
 
 
@@ -206,51 +228,6 @@ module.exports = function (app) {
 //                               General functions which could be used more than once
 //===========================================================================================================
 
-/**
- * Store the provided file and its metadate in the MongoDB GridFS. It is mostly used for images but it can
- * store and file which is provided. This is the best way to store big amounts of data.
- *
- * @param file The file itself containing file.path
- * @param metadata File metadata also stored along with file
- * @param user The user for which this file should be stored
- * @param res The response object
- */
-function storeImage(file, metadata, user, res) {
-
-    db.storeFile(file, metadata, function (data, error) {
-        if (error) {
-            logger.error({error: err}, "Couldn't store file in database");
-            /*
-             TODO: Should we return something else in this case.
-             */
-            res.writeHead(200, {"Content-Type": "text/plain"});
-            res.write("Failure");
-            res.end();
-
-        }
-        else {
-            res.writeHead(200, {"Content-Type": "text/plain"});
-            res.write("Success");
-            res.end();
-
-            var query = {username: user};
-            if (metadata.imageType == 'profile')
-                var update = {profileImage: file.name};
-            else
-                var update = {coverImage: file.name};
-
-            Account.findOneAndUpdate(query, update, function (err, message) {
-                if (err)
-                    logger.error({error: err}, "Couldn't update account with image file info");
-                else
-                    logger.info({image: file.name, user: user}, "Updated image info in user account");
-            });
-        }
-
-    });
-
-
-};
 
 /**
  * Obtains the profile information of the provided user and creates an JSON object for it. It is directly sent via

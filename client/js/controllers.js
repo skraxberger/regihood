@@ -524,12 +524,13 @@ angular.module('regihoodApp').controller('CropImageController', function ($scope
 
 });
 
-angular.module('regihoodApp').controller('MarketController', ['$scope', '$http', '$upload', '$modal', 'generalLibrary', function ($scope, $http, $upload, $modal, generalLibrary) {
+angular.module('regihoodApp').controller('MarketController', ['$scope', '$http', '$upload', '$modal', 'StringManipulation', function ($scope, $http, $upload, $modal, StringManipulation) {
     $scope.item = {};
     $scope.products = [];
     $scope.query = "";
     $scope.displayedProducts = [];
     $scope.imageSelectButtonText = "Bild auswählen";
+    $scope.storedImageName = "img/item-empty.png";
 
     var maxInitialProducts = 8;
     var lastIndex = 0;
@@ -557,15 +558,16 @@ angular.module('regihoodApp').controller('MarketController', ['$scope', '$http',
 
     $scope.createProduct = function () {
         $scope.item.owner = $scope.currentUser;
-        $http.post('/api/market', $scope.item)
-            .success(function (data) {
-                $scope.products = data;
-                //$scope.products.unshift(data[0]);
-                $scope.filterProducts($scope);
-            })
-            .error(function (error) {
-                console.log('Error: ' + error);
-            });
+        $scope.item.image = '/api/v1/image/' + $scope.storedImageName.filename;
+            $http.post('/api/market', $scope.item)
+                .success(function (data) {
+                    $scope.products = data;
+                    //$scope.products.unshift(data[0]);
+                    $scope.filterProducts($scope);
+                })
+                .error(function (error) {
+                    console.log('Error: ' + error);
+                });
         $scope.item = {}; // clear the form so our user is ready to enter another
     }
 
@@ -615,7 +617,7 @@ angular.module('regihoodApp').controller('MarketController', ['$scope', '$http',
     $scope.$watch('productImages', function () {
         if ($scope.productImages && $scope.productImages.length) {
             cropImageAndUpload($upload, $http, $scope.productImages[0], $modal, $scope, 'product');
-            $scope.imageSelectButtonText = generalLibrary.getFilenameFromPath($scope.productImages[0]);
+            $scope.imageSelectButtonText = StringManipulation.getFilenameFromPath($scope.productImages[0]);
         }
     });
 
@@ -646,6 +648,7 @@ angular.module('regihoodApp').controller("ProductController", function ($scope, 
     function populateProductInfo() {
         $scope.productInfo.name = product.name;
         $scope.productInfo.description = product.description;
+        $scope.productInfo.image = product.image;
     }
 
 
@@ -753,12 +756,17 @@ function upload($scope, $http, $upload, imageFile, imageType) {
         console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
     }).success(function (data, status, headers, config) {
         console.log('file ' + config.file.name + 'uploaded.');
+
+        $scope.storedImageName = data;
+
         /*
          TODO: Chould be made more efficient probably
          */
-        retrieveProfileInfo($http, $scope.currentUser, function (profileInfo) {
-            $scope.profileInfo = profileInfo
-        });
+        if (imageType === 'profile' || imageType === 'cover') {
+            retrieveProfileInfo($http, $scope.currentUser, function (profileInfo) {
+                $scope.profileInfo = profileInfo
+            });
+        }
     });
 };
 
