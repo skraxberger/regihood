@@ -1,4 +1,4 @@
-div(ng-controller="ProfileController as profileCtrl", ng-init="initCurrentUser('#{user.username}')")
+div(ng-controller="ProfileController as profileCtrl")
     .row
         .profile-cover-container(ng-mouseenter="coverChangeVisible = true", ng-mouseleave="coverChangeVisible = false", ng-init="coverChangeVisible = false")
             .profile-cover-resize-wrapper(ng-show="repositionCover")
@@ -25,7 +25,7 @@ div(ng-controller="ProfileController as profileCtrl", ng-init="initCurrentUser('
                 .headline(ng-show="repositionCover")
                     .btn.btn-xs.btn-primary.pull-right.headline-tag(ng-click="repositionCover=false") Abbrechen
                     .btn.btn-xs.btn-primary.pull-right.headline-tag(ng-click="saveCoverImagePosition()") Speichern
-    .row(ng-controller="PrivateMessageController as msgCtrl", ng-init="initCurrentUser('#{user.username}')")
+    .row(ng-controller="PrivateMessageController as msgCtrl")
         .col-xs-6.col-sm-2
         .col-xs-6.col-sm-7
             .card.special(ng-repeat="message in messages")

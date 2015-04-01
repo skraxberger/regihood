@@ -15,16 +15,6 @@ var Account = require('../model/account');
 var Message = require('../model/message');
 var NewsItem = require('../model/newsitem');
 
-// The mongodb instance created when the mongoose.connection is opened
-var db = mongoose.connection.db;
-
-// The native mongo driver which is used by mongoose
-var mongoDriver = mongoose.mongo;
-
-
-// Create a gridfs-stream
-var gfs = new Gridfs(db, mongoDriver);
-
 
 module.exports = function (app) {
 // =============================================================================
@@ -164,7 +154,7 @@ module.exports = function (app) {
 
         Message.findOne(query, function (err, message) {
             if (err)
-                logger.error({error: err}, {message: message._id}, "Couldn't update message in database");
+                logger.error({error: err}, {message: message_id}, "Couldn't update message in database");
             else {
                 message = makeDeepCopy(message, req.body);
                 message.save();
@@ -280,7 +270,7 @@ function getProfileInfo(username, response) {
             logger.error({error: error}, "Couldn't obtain account from database");
         if (profile) {
             logger.info({profile: profile}, query, "Found and returning profile info");
-            if (library.endsWith(profile.coverImage, "cover-empty.jpg")) {
+            if (library.endsWith(profile.coverImage, "cover-empty.png")) {
                 profileInfo.coverImage = profile.coverImage;
             }
             else {

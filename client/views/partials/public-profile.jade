@@ -1,4 +1,4 @@
-div(ng-controller="PublicProfileController as profileCtrl", ng-init="initCurrentUser()")
+div(ng-controller="PublicProfileController as profileCtrl")
     .row
         .profile-cover-container
             .profile-cover-wrapper
@@ -11,7 +11,7 @@ div(ng-controller="PublicProfileController as profileCtrl", ng-init="initCurrent
                     a.headline-tag Timeline
                     span.headline-tag |
                     a.headline-tag About
-    .row(ng-controller="PublicMessageController as msgCtrl", ng-init="initCurrentUser()")
+    .row(ng-controller="PublicMessageController as msgCtrl")
         .col-xs-6.col-sm-2
         .col-xs-6.col-sm-7
             .card.special(ng-repeat="message in messages")

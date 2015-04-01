@@ -42,7 +42,7 @@ var Account = new Schema({
         }
     },
     loggedIn: {type: Boolean, default: false},
-    coverImage: {type: String, default: 'img/cover-empty.jpg'},
+    coverImage: {type: String, default: 'img/cover-empty.png'},
     coverImagePosition: {type: Number, default: 0},
     profileImage: {type: String, default: 'img/profile-empty.png'}
 });

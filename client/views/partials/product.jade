@@ -1,0 +1,16 @@
+div(ng-controller="ProductController as ProdCtrl")
+    .row
+        .col-xs-6.col-sm-4
+            .card.special
+                .card-heading
+                    .card-heading-header
+                        h6 Produzent
+                        img.small-profile(ng-src="{{productInfo.producerImage}}")
+                        p {{productInfo.producerName}}
+        .col-xs-6.col-sm-8
+            .card.special
+                .card-heading
+                    .card-heading-header
+                        h4 {{productInfo.name}}
+                .card-body
+                    p {{productInfo.description}}

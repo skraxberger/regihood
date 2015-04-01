@@ -1,4 +1,4 @@
-regihoodApp.directive('dragImage', ['$document', function ($document) {
+angular.module('regihoodApp').directive('dragImage', ['$document', function ($document) {
     return {
         restrict: 'EA',
 

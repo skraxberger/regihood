@@ -54,5 +54,21 @@ module.exports = function (app) {
         });
     });
 
+    app.get('/api/product/:product_id', library.loggedIn, function (req, res) {
+        var query = {_id: req.params.product_id};
+
+        /*
+         TODO: We need to find a way to update the whole message except the id, although the id may not change since it
+         is not editable.
+         */
+
+        Product.findOne(query, function (err, product) {
+            if (err)
+                logger.error({error: err}, {message: product_id}, "Couldn't update message in database");
+            else {
+                res.json(product); // return all messages in JSON format
+            }
+        });
+    });
 };
 

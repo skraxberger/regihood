@@ -51,9 +51,6 @@ function storeInGridFS(file, metadata, callback) {
     fs.createReadStream(file.path).pipe(writestream);
 
     writestream.on('close', function (storedFile) {
-        res.writeHead(200, {"Content-Type": "text/plain"});
-        res.write("Success");
-        res.end();
 
         fs.unlink(file.path, function (err) {
             if (err)

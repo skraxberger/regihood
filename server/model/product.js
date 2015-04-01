@@ -13,10 +13,11 @@ var logger = bunyan.createLogger({name: 'database'});
 var Schema = mongoose.Schema;
 
 var Product = new Schema({
-    owner : String, /* Creator this message */
+    producer : String, /* Producer of this product */
+    owner : String, /* Creator this product */
     name : String,
     description : String, /* Content as pure string */
-    likes : [String], /* List of users who liked this message */
+    likes : [String], /* List of users who liked this product */
     comments: [], /* Added comments */
     priceSelf : Number,
     priceDist : Number,
@@ -25,9 +26,9 @@ var Product = new Schema({
     quantityMaximum : {type: Number, default: -1},
     unit : {type: String, default: "single"},
     availability : {type: String, default : "alltime"},
-    image: {type: String, default: 'img/item-empty.jpg'},
+    image: {type: String, default: 'img/item-empty.png'},
     deleted : {type: Boolean, default: false},
-    date : { type: Date, default: Date.now } /* Message creation date */
+    date : { type: Date, default: Date.now } /* Product creation date */
 });
 
 Product.post('save', function (doc) {

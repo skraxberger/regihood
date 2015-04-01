@@ -1,4 +1,4 @@
-div(ng-controller="ProductController as ProdCtrl")
+div(ng-controller="MarketController as MrktCtrl")
     .row(style="margin-top: 20px")
         .col-md-2
         .col-md-8
@@ -23,6 +23,11 @@ div(ng-controller="ProductController as ProdCtrl")
                     textarea.form-control(type="text", ng-model="item.description", name="productDescription")
             .row.form-group
                 .col-md-3
+                    label.control-label(for="productImage") Produktbild:
+                .col-md-6
+                    button.btn.btn-info.form-control(ng-file-select, ng-model="productImages") {{imageSelectButtonText}}
+            .row.form-group
+                .col-md-3
                     label.control-label(for="productName") Preis:
                 .col-md-6
                     input.form-control(type="number", ng-model="item.priceDist", name="productRetailPrice" required)
@@ -35,7 +40,7 @@ div(ng-controller="ProductController as ProdCtrl")
             .col-xs-4.col-md-3(ng-repeat="product in rowProducts")
                 ul.thumbnails
                     li.list-inline
-                        a(ng-href="/product/{{product._id}}").thumbnail
+                        a(ng-click="getProductPage(product)").thumbnail
                             img(src="http://placehold.it/210x160", alt="")
                             h6 {{product.name}}
                                 p.pull-right € {{product.priceDist}}

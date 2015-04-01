@@ -2,7 +2,7 @@
 
 
 // Declare app level module which depends on filters, and services
-var regihoodApp = angular.module('regihoodApp', ['ui.router', 'ui.bootstrap', 'ui.utils', 'angularFileUpload', 'ngImgCrop', 'infinite-scroll']);
+angular.module('regihoodApp', ['ui.router', 'ui.bootstrap', 'ui.utils', 'angularFileUpload', 'ngImgCrop', 'infinite-scroll']);
 
 
 /*
@@ -17,7 +17,7 @@ var regihoodApp = angular.module('regihoodApp', ['ui.router', 'ui.bootstrap', 'u
  }]);
  */
 
-regihoodApp.config(
+angular.module('regihoodApp').config(
     ['$stateProvider', '$urlRouterProvider',
         function ($stateProvider, $urlRouterProvider) {
 
@@ -79,6 +79,17 @@ regihoodApp.config(
                     templateUrl: 'partial/market'
                 })
 
+                .state('product', {
+                    url: "/:product_id",
+                    templateUrl: 'partial/product',
+                    controller: function ($scope, $stateParams) {
+                        $scope.product_id = $stateParams.product_id;
+                    },
+                    onEnter: function () {
+                        console.log("Entering public profile");
+                    }
+                })
+
                 .state('settings', {
                     url: "/settings",
                     templateUrl: 'partial/settings'
@@ -99,7 +110,7 @@ regihoodApp.config(
     ]
 );
 
-regihoodApp.run(
+angular.module('regihoodApp').run(
     ['$rootScope', '$state', '$stateParams',
         function ($rootScope, $state, $stateParams) {
 

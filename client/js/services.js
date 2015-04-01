@@ -1,26 +1,23 @@
-/**
- * Created by skraxberger on 13.02.2015.
- */
-app.factory('socket', function ($rootScope) {
-    var socket = io.connect();
+
+angular.module('regihoodApp').factory('generalLibrary', function() {
     return {
-        on: function (eventName, callback) {
-            socket.on(eventName, function () {
-                var args = arguments;
-                $rootScope.$apply(function () {
-                    callback.apply(socket, args);
-                });
-            });
+        endsWith: function(str, suffix){
+            return str.indexOf(suffix, str.length - suffix.length) !== -1;
         },
-        emit: function (eventName, data, callback) {
-            socket.emit(eventName, data, function () {
-                var args = arguments;
-                $rootScope.$apply(function () {
-                    if (callback) {
-                        callback.apply(socket, args);
-                    }
-                });
-            })
+
+        getFilenameFromPath: function(path) {
+            if (path.name.("/") >= 0) {
+                var startIndex = path.name.lastIndexOf("/");
+                return path.name.substring(startIndex);
+            }
+            else if (path.name.indexOf("\\") >= 0) {
+                var startIndex = path.name.lastIndexOf("\\");
+                return path.name.substring(startIndex);
+            }
+            else {
+                return path.name;
+            }
+
         }
     };
 });
