@@ -569,6 +569,7 @@ angular.module('regihoodApp').controller('MarketController', ['$scope', '$http',
                     console.log('Error: ' + error);
                 });
         $scope.item = {}; // clear the form so our user is ready to enter another
+        $scope.imageSelectButtonText = "Bild auswählen";
     }
 
 
